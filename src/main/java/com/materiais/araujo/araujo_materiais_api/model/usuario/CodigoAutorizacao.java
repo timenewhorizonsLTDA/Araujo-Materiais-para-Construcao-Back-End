@@ -12,12 +12,16 @@ public class CodigoAutorizacao {
     private Integer id;
 
     @ManyToOne
+    @JoinColumn(nullable = false)
     private Usuario usuario;
 
+    @Column(nullable = false)
     private String codigo;
 
+    @Column(nullable = false)
     private Instant horarioDeEnvio;
 
+    @Column(nullable = false)
     private Instant horarioDeExpiracao;
 
     public CodigoAutorizacao() {
