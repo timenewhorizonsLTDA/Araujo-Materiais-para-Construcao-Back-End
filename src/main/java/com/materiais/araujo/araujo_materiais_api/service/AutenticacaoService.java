@@ -1,6 +1,9 @@
 package com.materiais.araujo.araujo_materiais_api.service;
 
 import com.materiais.araujo.araujo_materiais_api.DTO.usuario.CadastroDTO;
+import com.materiais.araujo.araujo_materiais_api.DTO.usuario.CodigoValidacaoDTO;
+import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.usuario.CodigoDeValidacaoExpiradoException;
+import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.usuario.CodigoDeValidacaoNaoValidoException;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.usuario.CpfJaCadastradoExeception;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.usuario.EmailJaCadastradoException;
 import com.materiais.araujo.araujo_materiais_api.model.usuario.CodigoAutorizacao;
@@ -11,7 +14,6 @@ import com.materiais.araujo.araujo_materiais_api.repository.CodigoAutorizacaoRep
 import com.materiais.araujo.araujo_materiais_api.repository.UsuarioRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -42,6 +44,7 @@ public class AutenticacaoService {
         this.emailService = emailService;
     }
 
+
     public ResponseEntity<String> cadastrarUsuario(CadastroDTO dto) {
         if (this.usuarioRepository.findByEmail(dto.email()).isPresent()) {
             throw new EmailJaCadastradoException();
@@ -52,21 +55,46 @@ public class AutenticacaoService {
 
         String senhaCriptografada = passwordEncoder.encode(dto.senha());
 
-        Usuario usuario = new Usuario(dto.nome(), dto.cpf(), dto.email(),
-                senhaCriptografada, RoleUsuario.CLIENTE, StatusUsuario.INATIVO);
+        Usuario usuario = new Usuario(dto.nome(), dto.cpf(), dto.email(), senhaCriptografada, RoleUsuario.CLIENTE, StatusUsuario.INATIVO);
 
         String codigo = UUID.randomUUID().toString().substring(0, 10);
         Instant horaioEnvio = Instant.now();
-        Instant horarioDeExpiracao = horaioEnvio.plusMillis(900000);
+        Instant horarioDeExpiracao = horaioEnvio.plusMillis(600000);
 
         CodigoAutorizacao codigoAutorizacao = new CodigoAutorizacao(usuario, codigo, horaioEnvio, horarioDeExpiracao);
 
 
         usuarioRepository.save(usuario);
         codigoAutorizacaoRepository.save(codigoAutorizacao);
-        emailService.enviarEmail(usuario.getEmail(), "Codigo de validacao",
-                "O seu codigo de validacao é: " + codigoAutorizacao.getCodigo());
+        emailService.enviarEmail(usuario.getEmail(), "Codigo de validacao", "O seu codigo de validacao é: " + codigoAutorizacao.getCodigo());
 
         return ResponseEntity.ok().body("Cadastro realizado com sucesso, agora verifique o seu email!");
+    }
+
+    public ResponseEntity<String> validarUsuario(CodigoValidacaoDTO dto) {
+
+        CodigoAutorizacao codigoAutorizacao = codigoAutorizacaoRepository.findByCodigo(dto.codigo())
+                .orElseThrow(() -> new CodigoDeValidacaoNaoValidoException());
+
+        Usuario usuario = codigoAutorizacao.getUsuario();
+
+        Instant horaAtual = Instant.now();
+
+        if (horaAtual.isAfter(codigoAutorizacao.getHorarioDeExpiracao())) {
+
+            this.codigoAutorizacaoRepository.delete(codigoAutorizacao);
+
+            if (usuario.getStatusUsuario() == StatusUsuario.INATIVO) {
+                this.usuarioRepository.delete(usuario);
+            }
+
+            throw new CodigoDeValidacaoExpiradoException();
+        }
+
+        usuario.setStatusUsuario(StatusUsuario.ATIVO);
+        this.usuarioRepository.save(usuario);
+        this.codigoAutorizacaoRepository.delete(codigoAutorizacao);
+
+        return ResponseEntity.ok().body("Validacao concluida com sucesso, agora realize o login");
     }
 }
