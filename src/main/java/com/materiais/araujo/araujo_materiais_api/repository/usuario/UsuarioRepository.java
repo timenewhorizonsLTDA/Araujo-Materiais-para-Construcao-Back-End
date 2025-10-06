@@ -1,4 +1,4 @@
-package com.materiais.araujo.araujo_materiais_api.repository;
+package com.materiais.araujo.araujo_materiais_api.repository.usuario;
 
 import com.materiais.araujo.araujo_materiais_api.model.usuario.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;

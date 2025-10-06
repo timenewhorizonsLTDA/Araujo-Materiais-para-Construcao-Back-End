@@ -10,8 +10,8 @@ import com.materiais.araujo.araujo_materiais_api.model.usuario.CodigoAutorizacao
 import com.materiais.araujo.araujo_materiais_api.model.usuario.RoleUsuario;
 import com.materiais.araujo.araujo_materiais_api.model.usuario.StatusUsuario;
 import com.materiais.araujo.araujo_materiais_api.model.usuario.Usuario;
-import com.materiais.araujo.araujo_materiais_api.repository.CodigoAutorizacaoRepository;
-import com.materiais.araujo.araujo_materiais_api.repository.UsuarioRepository;
+import com.materiais.araujo.araujo_materiais_api.repository.usuario.CodigoAutorizacaoRepository;
+import com.materiais.araujo.araujo_materiais_api.repository.usuario.UsuarioRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
