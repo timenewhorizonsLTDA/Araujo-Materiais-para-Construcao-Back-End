@@ -1,4 +1,4 @@
-package com.materiais.araujo.araujo_materiais_api.service;
+package com.materiais.araujo.araujo_materiais_api.service.usuario;
 
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.usuario.FalhaAoEnviarEmailException;
 import org.springframework.beans.factory.annotation.Value;

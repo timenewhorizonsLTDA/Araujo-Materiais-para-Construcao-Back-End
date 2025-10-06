@@ -1,4 +1,4 @@
-package com.materiais.araujo.araujo_materiais_api.service;
+package com.materiais.araujo.araujo_materiais_api.service.usuario;
 
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.usuario.EmailNaoEncontradoException;
 import com.materiais.araujo.araujo_materiais_api.repository.UsuarioRepository;

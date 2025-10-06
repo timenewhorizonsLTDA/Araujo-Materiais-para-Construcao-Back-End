@@ -1,11 +1,11 @@
-package com.materiais.araujo.araujo_materiais_api.service;
+package com.materiais.araujo.araujo_materiais_api.service.usuario;
 
 import com.materiais.araujo.araujo_materiais_api.DTO.usuario.CadastroDTO;
 import com.materiais.araujo.araujo_materiais_api.DTO.usuario.CodigoValidacaoDTO;
-import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.usuario.CodigoDeValidacaoExpiradoException;
-import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.usuario.CodigoDeValidacaoNaoValidoException;
-import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.usuario.CpfJaCadastradoExeception;
-import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.usuario.EmailJaCadastradoException;
+import com.materiais.araujo.araujo_materiais_api.DTO.usuario.LoginDTO;
+import com.materiais.araujo.araujo_materiais_api.DTO.usuario.TokenDTO;
+import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.usuario.*;
+import com.materiais.araujo.araujo_materiais_api.infra.security.TokenService;
 import com.materiais.araujo.araujo_materiais_api.model.usuario.CodigoAutorizacao;
 import com.materiais.araujo.araujo_materiais_api.model.usuario.RoleUsuario;
 import com.materiais.araujo.araujo_materiais_api.model.usuario.StatusUsuario;
@@ -14,6 +14,7 @@ import com.materiais.araujo.araujo_materiais_api.repository.CodigoAutorizacaoRep
 import com.materiais.araujo.araujo_materiais_api.repository.UsuarioRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -33,17 +34,23 @@ public class AutenticacaoService {
 
     private EmailService emailService;
 
+    private UtilUsuario utilUsuario;
 
-    public AutenticacaoService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder,
+    private TokenService tokenService;
+
+
+    public AutenticacaoService(UsuarioRepository usuarioRepository,
                                CodigoAutorizacaoRepository codigoAutorizacaoRepository,
-                               AuthenticationManager authenticationManager, EmailService emailService) {
+                               PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager,
+                               EmailService emailService, UtilUsuario utilUsuario, TokenService tokenService) {
         this.usuarioRepository = usuarioRepository;
-        this.passwordEncoder = passwordEncoder;
         this.codigoAutorizacaoRepository = codigoAutorizacaoRepository;
+        this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.emailService = emailService;
+        this.utilUsuario = utilUsuario;
+        this.tokenService = tokenService;
     }
-
 
     public ResponseEntity<String> cadastrarUsuario(CadastroDTO dto) {
         if (this.usuarioRepository.findByEmail(dto.email()).isPresent()) {
@@ -97,4 +104,27 @@ public class AutenticacaoService {
 
         return ResponseEntity.ok().body("Validacao concluida com sucesso, agora realize o login");
     }
+
+    public ResponseEntity<TokenDTO> login(LoginDTO dto){
+
+        Usuario usuario = utilUsuario.obterUsuarioEmail(dto.email());
+
+        if(usuario.getStatusUsuario() == StatusUsuario.INATIVO){
+            throw new UsuarioInativoException();
+        }
+
+        var usernameToken = new UsernamePasswordAuthenticationToken(dto.email(), dto.senha());
+
+        authenticationManager.authenticate(usernameToken);
+
+        String token = tokenService.gerarToken(usuario);
+
+        TokenDTO tokenDTO = new TokenDTO(token);
+
+        return ResponseEntity.ok().body(tokenDTO);
+
+    }
+
+
+
 }
