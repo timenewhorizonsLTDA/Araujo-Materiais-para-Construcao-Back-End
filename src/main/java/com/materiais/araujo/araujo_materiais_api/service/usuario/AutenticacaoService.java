@@ -64,7 +64,7 @@ public class AutenticacaoService {
 
         Usuario usuario = new Usuario(dto.nome(), dto.cpf(), dto.email(), senhaCriptografada, RoleUsuario.CLIENTE, StatusUsuario.INATIVO);
 
-        String codigo = UUID.randomUUID().toString().substring(0, 10);
+        String codigo = UUID.randomUUID().toString().substring(0, 6);
         Instant horaioEnvio = Instant.now();
         Instant horarioDeExpiracao = horaioEnvio.plusMillis(600000);
 
