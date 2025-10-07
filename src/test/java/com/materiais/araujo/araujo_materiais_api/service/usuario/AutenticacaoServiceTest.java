@@ -2,10 +2,9 @@ package com.materiais.araujo.araujo_materiais_api.service.usuario;
 
 import com.materiais.araujo.araujo_materiais_api.DTO.usuario.CadastroDTO;
 import com.materiais.araujo.araujo_materiais_api.DTO.usuario.CodigoValidacaoDTO;
-import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.usuario.CodigoDeValidacaoExpiradoException;
-import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.usuario.CodigoDeValidacaoNaoValidoException;
-import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.usuario.CpfJaCadastradoExeception;
-import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.usuario.EmailJaCadastradoException;
+import com.materiais.araujo.araujo_materiais_api.DTO.usuario.LoginDTO;
+import com.materiais.araujo.araujo_materiais_api.DTO.usuario.TokenDTO;
+import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.usuario.*;
 import com.materiais.araujo.araujo_materiais_api.infra.security.TokenService;
 import com.materiais.araujo.araujo_materiais_api.model.usuario.CodigoAutorizacao;
 import com.materiais.araujo.araujo_materiais_api.model.usuario.StatusUsuario;
@@ -18,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,8 +25,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.time.Instant;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -64,6 +63,9 @@ class AutenticacaoServiceTest {
     //validacao
     private CodigoAutorizacao codigoAutorizacao = new CodigoAutorizacao();
     private CodigoValidacaoDTO codigoValidacaoDTO = new CodigoValidacaoDTO("121212");
+
+    //login
+    private LoginDTO loginDTO = new LoginDTO("vitor@gmail.com", "123");
 
     @Test
     @DisplayName("Sucesso ao realizar cadastro")
@@ -163,6 +165,34 @@ class AutenticacaoServiceTest {
 
         assertThrows(CodigoDeValidacaoExpiradoException.class, () -> autenticacaoService.validarUsuario(codigoValidacaoDTO));
         verify(usuarioRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Sucesso ao realizar login")
+    void logincase1(){
+
+        when(utilUsuario.obterUsuarioEmail(any())).thenReturn(usuario);
+
+        usuario.setStatusUsuario(StatusUsuario.ATIVO);
+
+        ResponseEntity<TokenDTO> resposta =  autenticacaoService.login(loginDTO);
+
+        verify(tokenService).gerarToken(any());
+        assertEquals(HttpStatus.OK, resposta.getStatusCode());
+
+    }
+
+    @Test
+    @DisplayName("Deve lancar UsuarioInativoException")
+    void logincase2(){
+
+        usuario.setStatusUsuario(StatusUsuario.INATIVO);
+
+        when(utilUsuario.obterUsuarioEmail(any())).thenReturn(usuario);
+
+        assertThrows(UsuarioInativoException.class, () -> autenticacaoService.login(loginDTO));
+        verify(tokenService, never()).gerarToken(any());
+
     }
 
 }
