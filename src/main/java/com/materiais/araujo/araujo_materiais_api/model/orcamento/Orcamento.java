@@ -16,7 +16,8 @@ public class Orcamento {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = false)
+    @ManyToOne
+    @JoinColumn(nullable = false)
     private Usuario cliente;
 
     @OneToMany
