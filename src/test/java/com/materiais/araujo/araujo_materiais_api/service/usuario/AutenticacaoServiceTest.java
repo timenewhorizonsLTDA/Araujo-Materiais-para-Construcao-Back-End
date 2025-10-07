@@ -1,9 +1,14 @@
 package com.materiais.araujo.araujo_materiais_api.service.usuario;
 
 import com.materiais.araujo.araujo_materiais_api.DTO.usuario.CadastroDTO;
+import com.materiais.araujo.araujo_materiais_api.DTO.usuario.CodigoValidacaoDTO;
+import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.usuario.CodigoDeValidacaoExpiradoException;
+import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.usuario.CodigoDeValidacaoNaoValidoException;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.usuario.CpfJaCadastradoExeception;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.usuario.EmailJaCadastradoException;
 import com.materiais.araujo.araujo_materiais_api.infra.security.TokenService;
+import com.materiais.araujo.araujo_materiais_api.model.usuario.CodigoAutorizacao;
+import com.materiais.araujo.araujo_materiais_api.model.usuario.StatusUsuario;
 import com.materiais.araujo.araujo_materiais_api.model.usuario.Usuario;
 import com.materiais.araujo.araujo_materiais_api.repository.usuario.CodigoAutorizacaoRepository;
 import com.materiais.araujo.araujo_materiais_api.repository.usuario.UsuarioRepository;
@@ -17,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.Instant;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -51,8 +57,13 @@ class AutenticacaoServiceTest {
     @InjectMocks
     private AutenticacaoService autenticacaoService;
 
+    //registro
     private CadastroDTO dto = new CadastroDTO("vitor", "70345324", "vitor@gmail.com", "123");
     private Usuario usuario = new Usuario();
+
+    //validacao
+    private CodigoAutorizacao codigoAutorizacao = new CodigoAutorizacao();
+    private CodigoValidacaoDTO codigoValidacaoDTO = new CodigoValidacaoDTO("121212");
 
     @Test
     @DisplayName("Sucesso ao realizar cadastro")
@@ -73,7 +84,7 @@ class AutenticacaoServiceTest {
     }
 
     @Test
-    @DisplayName("Deve lancar uma EmailJaCadastradoException")
+    @DisplayName("Deve lancar EmailJaCadastradoException")
     void cadastrarUsuarioCase2() {
 
         when(usuarioRepository.findByEmail(any())).thenReturn(Optional.of(usuario));
@@ -85,7 +96,7 @@ class AutenticacaoServiceTest {
     }
 
     @Test
-    @DisplayName("Deve lancar uma CpfJaCadastradoExeception")
+    @DisplayName("Deve lancar CpfJaCadastradoExeception")
     void cadastrarUsuarioCase3() {
 
         when(usuarioRepository.findByCpf(any())).thenReturn(Optional.of(usuario));
@@ -94,6 +105,64 @@ class AutenticacaoServiceTest {
 
         verify(usuarioRepository, never()).save(any());
 
+    }
+
+    @Test
+    @DisplayName("Sucesso ao validar usuario")
+    void validarUsuariocase1(){
+
+        Instant horaAtual = Instant.now();
+
+        Instant horaExpiracao = horaAtual.plusMillis(600000);
+
+        codigoAutorizacao.setHorarioDeEnvio(horaAtual);
+        codigoAutorizacao.setHorarioDeExpiracao(horaExpiracao);
+
+        codigoAutorizacao.setUsuario(usuario);
+        codigoAutorizacao.getUsuario().setStatusUsuario(StatusUsuario.INATIVO);
+
+        when(codigoAutorizacaoRepository.findByCodigo(any())).thenReturn(Optional.of(codigoAutorizacao));
+
+
+        ResponseEntity<String> response = autenticacaoService.validarUsuario(codigoValidacaoDTO);
+
+
+        assertTrue(response.getBody().contains("Validacao concluida"));
+        verify(usuarioRepository).save(any());
+
+    }
+
+    @Test
+    @DisplayName("Deve lancar CodigoDeValidacaoNaoValidoException")
+    void validarUsuariocase2(){
+
+        when(codigoAutorizacaoRepository.findByCodigo(any())).thenReturn(Optional.empty());
+
+
+        assertThrows(CodigoDeValidacaoNaoValidoException.class, () -> autenticacaoService.validarUsuario(codigoValidacaoDTO));
+        verify(usuarioRepository, never()).save(any());
+
+    }
+
+    @Test
+    @DisplayName("Deve lancar CodigoDeValidacaoExpiradoException")
+    void validarUsuariocase3(){
+
+        Instant horaAtual = Instant.now();
+
+        Instant horaExpiracao = horaAtual.minusMillis(600000);
+
+        codigoAutorizacao.setHorarioDeEnvio(horaAtual);
+        codigoAutorizacao.setHorarioDeExpiracao(horaExpiracao);
+
+        codigoAutorizacao.setUsuario(usuario);
+        codigoAutorizacao.getUsuario().setStatusUsuario(StatusUsuario.INATIVO);
+
+        when(codigoAutorizacaoRepository.findByCodigo(any())).thenReturn(Optional.of(codigoAutorizacao));
+
+
+        assertThrows(CodigoDeValidacaoExpiradoException.class, () -> autenticacaoService.validarUsuario(codigoValidacaoDTO));
+        verify(usuarioRepository, never()).save(any());
     }
 
 }
