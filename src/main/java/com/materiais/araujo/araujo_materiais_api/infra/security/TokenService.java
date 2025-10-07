@@ -3,7 +3,8 @@ package com.materiais.araujo.araujo_materiais_api.infra.security;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
-import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.usuario.FalhaAoCriarTokenException;
+import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.usuario.FalhaAoVerificarTokenException;
 import com.materiais.araujo.araujo_materiais_api.model.usuario.Usuario;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ public class TokenService {
     public String gerarToken(Usuario usuario) {
 
         try {
+
             Algorithm algorithm = Algorithm.HMAC256(minhaSenha);
 
             return JWT.create()
@@ -29,15 +31,17 @@ public class TokenService {
                     .withSubject(usuario.getEmail())
                     .withExpiresAt(tempoToken())
                     .sign(algorithm);
-
-        } catch (JWTCreationException e) {
-            throw new RuntimeException(e.getMessage());
+        } catch (RuntimeException e) {
+            throw new FalhaAoCriarTokenException();
         }
+
+
     }
 
     public String obterEmailUsuarioToken(String token) {
 
         try {
+
             Algorithm algorithm = Algorithm.HMAC256(minhaSenha);
 
             return JWT.require(algorithm)
@@ -46,9 +50,10 @@ public class TokenService {
                     .verify(token)
                     .getSubject();
 
-        } catch (JWTVerificationException e) {
-            throw new RuntimeException(e.getMessage());
+        } catch (RuntimeException e) {
+            throw new FalhaAoVerificarTokenException();
         }
+
 
     }
 

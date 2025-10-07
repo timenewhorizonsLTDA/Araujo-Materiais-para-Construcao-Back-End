@@ -60,10 +60,17 @@ public class Handler extends ResponseEntityExceptionHandler {
     }
 
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<RespostaErro> RuntimeHandler(RuntimeException e) {
+    @ExceptionHandler(FalhaAoCriarTokenException.class)
+    public ResponseEntity<RespostaErro> FalhaAoCriarTokenHandler(FalhaAoCriarTokenException e) {
         RespostaErro respostaErro = new RespostaErro(HttpStatus.BAD_REQUEST, e.getMessage());
         return ResponseEntity.status(respostaErro.getStatus()).body(respostaErro);
     }
+
+    @ExceptionHandler(FalhaAoVerificarTokenException.class)
+    public ResponseEntity<RespostaErro> FalhaAoVerificarTokenHandler(FalhaAoVerificarTokenException e) {
+        RespostaErro respostaErro = new RespostaErro(HttpStatus.BAD_REQUEST, e.getMessage());
+        return ResponseEntity.status(respostaErro.getStatus()).body(respostaErro);
+    }
+
 
 }

@@ -11,26 +11,26 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("auth")
-public class TesteControler {
+public class AutenticacaoController {
 
     private AutenticacaoService autenticacaoService;
 
-    public TesteControler(AutenticacaoService autenticacaoService) {
+    public AutenticacaoController(AutenticacaoService autenticacaoService) {
         this.autenticacaoService = autenticacaoService;
     }
 
     @PostMapping
-    public ResponseEntity<String> sla(@RequestBody @Valid CadastroDTO dto) {
+    public ResponseEntity<String> cadastrarUsuario(@RequestBody @Valid CadastroDTO dto) {
         return autenticacaoService.cadastrarUsuario(dto);
     }
 
     @PutMapping
-    public ResponseEntity<String> sla2(@RequestBody @Valid CodigoValidacaoDTO dto) {
+    public ResponseEntity<String> validarUsuario(@RequestBody @Valid CodigoValidacaoDTO dto) {
         return autenticacaoService.validarUsuario(dto);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<TokenDTO> sla3(@RequestBody @Valid LoginDTO dto) {
+    public ResponseEntity<TokenDTO> loginUsuario(@RequestBody @Valid LoginDTO dto) {
         return autenticacaoService.login(dto);
     }
 }
