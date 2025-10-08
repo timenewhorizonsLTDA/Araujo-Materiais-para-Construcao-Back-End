@@ -21,8 +21,8 @@ public class SolicitacaoProduto {
     private Usuario cliente;
 
     @OneToMany
-    @JoinColumn(nullable = false)
-    private List<Produto> produtos = new ArrayList<>();
+    @Column(nullable = false)
+    private List<Produto> produtos;
 
     @Column(nullable = false)
     private LocalDateTime dataHoraSolicitou;

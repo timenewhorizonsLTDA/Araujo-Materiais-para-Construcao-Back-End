@@ -5,7 +5,6 @@ import com.materiais.araujo.araujo_materiais_api.model.usuario.Usuario;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -17,12 +16,11 @@ public class Orcamento {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(nullable = false)
     private Usuario cliente;
 
     @OneToMany
-    @JoinColumn(nullable = false)
-    private List<Produto> produtos = new ArrayList<>();
+    @Column(nullable = false)
+    private List<Produto> produtos;
 
     @Column(nullable = false)
     private LocalDateTime dataEmissao;
@@ -33,6 +31,7 @@ public class Orcamento {
 
     public Orcamento() {
     }
+
 
     public Orcamento(Usuario cliente, List<Produto> produtos, LocalDateTime dataEmissao, Double valorFinal) {
         this.cliente = cliente;
@@ -69,13 +68,6 @@ public class Orcamento {
         this.cliente = cliente;
     }
 
-    public List<Produto> getProdutos() {
-        return produtos;
-    }
-
-    public void setProdutos(List<Produto> produtos) {
-        this.produtos = produtos;
-    }
 
     public LocalDateTime getDataEmissao() {
         return dataEmissao;
@@ -91,5 +83,13 @@ public class Orcamento {
 
     public void setValorFinal(Double valorFinal) {
         this.valorFinal = valorFinal;
+    }
+
+    public List<Produto> getProdutos() {
+        return produtos;
+    }
+
+    public void setProdutos(List<Produto> produtos) {
+        this.produtos = produtos;
     }
 }
