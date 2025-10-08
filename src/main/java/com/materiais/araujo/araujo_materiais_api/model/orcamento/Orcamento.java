@@ -16,10 +16,11 @@ public class Orcamento {
     private Integer id;
 
     @ManyToOne
+    @JoinColumn(nullable = false)
     private Usuario cliente;
 
     @OneToMany
-    @Column(nullable = false)
+    @JoinColumn(nullable = false)
     private List<Produto> produtos;
 
     @Column(nullable = false)

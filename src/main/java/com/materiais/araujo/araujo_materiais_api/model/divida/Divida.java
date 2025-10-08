@@ -24,6 +24,7 @@ public class Divida {
     private LocalDateTime dataVencimento;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private StatusDivida statusDivida;
 
     public Divida() {
