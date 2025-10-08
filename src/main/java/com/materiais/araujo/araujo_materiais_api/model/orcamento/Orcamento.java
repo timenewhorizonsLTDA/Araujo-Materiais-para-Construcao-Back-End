@@ -28,28 +28,33 @@ public class Orcamento {
     @Column(nullable = false)
     private Double valorFinal;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private StatusOrcamento statusOrcamento;
+
 
     public Orcamento() {
     }
 
 
-    public Orcamento(Usuario cliente, List<Produto> produtos, LocalDateTime dataEmissao, Double valorFinal) {
+    public Orcamento(Usuario cliente, List<Produto> produtos, LocalDateTime dataEmissao, Double valorFinal, StatusOrcamento statusOrcamento) {
         this.cliente = cliente;
         this.produtos = produtos;
         this.dataEmissao = dataEmissao;
         this.valorFinal = valorFinal;
+        this.statusOrcamento = statusOrcamento;
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Orcamento orcamento = (Orcamento) o;
-        return Objects.equals(cliente, orcamento.cliente) && Objects.equals(produtos, orcamento.produtos) && Objects.equals(dataEmissao, orcamento.dataEmissao) && Objects.equals(valorFinal, orcamento.valorFinal);
+        return Objects.equals(cliente, orcamento.cliente) && Objects.equals(dataEmissao, orcamento.dataEmissao) && Objects.equals(valorFinal, orcamento.valorFinal) && statusOrcamento == orcamento.statusOrcamento;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(cliente, produtos, dataEmissao, valorFinal);
+        return Objects.hash(cliente, dataEmissao, valorFinal, statusOrcamento);
     }
 
     public Integer getId() {
@@ -91,5 +96,13 @@ public class Orcamento {
 
     public void setProdutos(List<Produto> produtos) {
         this.produtos = produtos;
+    }
+
+    public StatusOrcamento getStatusOrcamento() {
+        return statusOrcamento;
+    }
+
+    public void setStatusOrcamento(StatusOrcamento statusOrcamento) {
+        this.statusOrcamento = statusOrcamento;
     }
 }

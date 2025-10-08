@@ -35,8 +35,9 @@ public class Divida {
     public Divida() {
     }
 
-    public Divida(Usuario cliente, Double valor, LocalDateTime dataVencimento, StatusDivida statusDivida) {
+    public Divida(Usuario cliente, Orcamento orcamento, Double valor, LocalDateTime dataVencimento, StatusDivida statusDivida) {
         this.cliente = cliente;
+        this.orcamento = orcamento;
         this.valor = valor;
         this.dataVencimento = dataVencimento;
         this.statusDivida = statusDivida;
@@ -46,12 +47,12 @@ public class Divida {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Divida divida = (Divida) o;
-        return Objects.equals(cliente, divida.cliente) && Objects.equals(valor, divida.valor) && Objects.equals(dataVencimento, divida.dataVencimento) && statusDivida == divida.statusDivida;
+        return Objects.equals(cliente, divida.cliente) && Objects.equals(orcamento, divida.orcamento) && Objects.equals(valor, divida.valor) && Objects.equals(dataVencimento, divida.dataVencimento) && statusDivida == divida.statusDivida;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(cliente, valor, dataVencimento, statusDivida);
+        return Objects.hash(cliente, orcamento, valor, dataVencimento, statusDivida);
     }
 
     public Integer getId() {
@@ -92,5 +93,13 @@ public class Divida {
 
     public void setStatusDivida(StatusDivida statusDivida) {
         this.statusDivida = statusDivida;
+    }
+
+    public Orcamento getOrcamento() {
+        return orcamento;
+    }
+
+    public void setOrcamento(Orcamento orcamento) {
+        this.orcamento = orcamento;
     }
 }

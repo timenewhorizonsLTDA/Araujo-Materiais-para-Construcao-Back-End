@@ -5,6 +5,7 @@ import com.materiais.araujo.araujo_materiais_api.model.usuario.Usuario;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 public class SolicitacaoProduto {
@@ -41,15 +42,27 @@ public class SolicitacaoProduto {
     }
 
     public SolicitacaoProduto(Usuario cliente, Orcamento orcamento, LocalDateTime dataHoraSolicitou,
-                              String endereco, LocalDateTime dataHoraEntregue, String contato,
-                              StatusSolicitacao statusSolicitacao) {
+                              LocalDateTime dataHoraEntregue, String endereco,
+                              String contato, StatusSolicitacao statusSolicitacao) {
         this.cliente = cliente;
         this.orcamento = orcamento;
         this.dataHoraSolicitou = dataHoraSolicitou;
-        this.endereco = endereco;
         this.dataHoraEntregue = dataHoraEntregue;
+        this.endereco = endereco;
         this.contato = contato;
         this.statusSolicitacao = statusSolicitacao;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        SolicitacaoProduto that = (SolicitacaoProduto) o;
+        return Objects.equals(cliente, that.cliente) && Objects.equals(orcamento, that.orcamento) && Objects.equals(dataHoraSolicitou, that.dataHoraSolicitou) && Objects.equals(dataHoraEntregue, that.dataHoraEntregue) && Objects.equals(endereco, that.endereco) && Objects.equals(contato, that.contato) && statusSolicitacao == that.statusSolicitacao;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(cliente, orcamento, dataHoraSolicitou, dataHoraEntregue, endereco, contato, statusSolicitacao);
     }
 
     public Integer getId() {
@@ -115,4 +128,6 @@ public class SolicitacaoProduto {
     public void setOrcamento(Orcamento orcamento) {
         this.orcamento = orcamento;
     }
+
+
 }
