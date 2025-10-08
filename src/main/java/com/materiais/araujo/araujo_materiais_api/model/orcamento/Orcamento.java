@@ -19,8 +19,7 @@ public class Orcamento {
     @JoinColumn(nullable = false)
     private Usuario cliente;
 
-    @OneToMany
-    @JoinColumn(nullable = false)
+    @OneToMany(mappedBy = "orcamento")
     private List<Produto> produtos;
 
     @Column(nullable = false)

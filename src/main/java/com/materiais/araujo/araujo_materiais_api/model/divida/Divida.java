@@ -1,5 +1,6 @@
 package com.materiais.araujo.araujo_materiais_api.model.divida;
 
+import com.materiais.araujo.araujo_materiais_api.model.orcamento.Orcamento;
 import com.materiais.araujo.araujo_materiais_api.model.usuario.Usuario;
 import jakarta.persistence.*;
 
@@ -14,7 +15,12 @@ public class Divida {
     private Integer id;
 
     @ManyToOne
+    @JoinColumn(nullable = false)
     private Usuario cliente;
+
+    @OneToOne
+    @JoinColumn(nullable = false)
+    private Orcamento orcamento;
 
     @Column(nullable = false)
     private Double valor;

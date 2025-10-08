@@ -1,5 +1,6 @@
 package com.materiais.araujo.araujo_materiais_api.model.produto;
 
+import com.materiais.araujo.araujo_materiais_api.model.orcamento.Orcamento;
 import jakarta.persistence.*;
 
 import java.util.Objects;
@@ -26,28 +27,31 @@ public class Produto {
     @Column(nullable = false)
     private Integer estoqueMinimo;
 
+    @ManyToOne
+    private Orcamento orcamento;
+
     public Produto() {
     }
 
-    public Produto(String nome, String codigo, Double preco,
-                   Integer quantidade, Integer estoqueMinimo) {
+    public Produto(String nome, String codigo, Double preco, Integer quantidade, Integer estoqueMinimo, Orcamento orcamento) {
         this.nome = nome;
         this.codigo = codigo;
         this.preco = preco;
         this.quantidade = quantidade;
         this.estoqueMinimo = estoqueMinimo;
+        this.orcamento = orcamento;
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Produto produto = (Produto) o;
-        return Objects.equals(nome, produto.nome) && Objects.equals(codigo, produto.codigo) && Objects.equals(preco, produto.preco) && Objects.equals(quantidade, produto.quantidade) && Objects.equals(estoqueMinimo, produto.estoqueMinimo);
+        return Objects.equals(nome, produto.nome) && Objects.equals(codigo, produto.codigo) && Objects.equals(preco, produto.preco) && Objects.equals(quantidade, produto.quantidade) && Objects.equals(estoqueMinimo, produto.estoqueMinimo) && Objects.equals(orcamento, produto.orcamento);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(nome, codigo, preco, quantidade, estoqueMinimo);
+        return Objects.hash(nome, codigo, preco, quantidade, estoqueMinimo, orcamento);
     }
 
     public Integer getId() {
@@ -96,5 +100,13 @@ public class Produto {
 
     public void setEstoqueMinimo(Integer estoqueMinimo) {
         this.estoqueMinimo = estoqueMinimo;
+    }
+
+    public Orcamento getOrcamento() {
+        return orcamento;
+    }
+
+    public void setOrcamento(Orcamento orcamento) {
+        this.orcamento = orcamento;
     }
 }
