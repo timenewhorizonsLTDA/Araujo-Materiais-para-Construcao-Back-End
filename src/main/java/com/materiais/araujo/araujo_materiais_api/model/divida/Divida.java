@@ -14,7 +14,6 @@ public class Divida {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(nullable = false)
     private Usuario cliente;
 
     @Column(nullable = false)
