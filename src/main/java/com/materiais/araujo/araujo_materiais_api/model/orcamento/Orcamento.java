@@ -20,7 +20,6 @@ public class Orcamento {
     private Usuario cliente;
 
     @OneToMany(mappedBy = "orcamento")
-    @JoinColumn(nullable = false)
     private List<Produto> produtos;
 
     @Column(nullable = false)
