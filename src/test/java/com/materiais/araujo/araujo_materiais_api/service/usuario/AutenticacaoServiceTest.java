@@ -1,9 +1,6 @@
 package com.materiais.araujo.araujo_materiais_api.service.usuario;
 
-import com.materiais.araujo.araujo_materiais_api.DTO.usuario.CadastroDTO;
-import com.materiais.araujo.araujo_materiais_api.DTO.usuario.CodigoValidacaoDTO;
-import com.materiais.araujo.araujo_materiais_api.DTO.usuario.LoginDTO;
-import com.materiais.araujo.araujo_materiais_api.DTO.usuario.TokenDTO;
+import com.materiais.araujo.araujo_materiais_api.DTO.usuario.*;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.usuario.*;
 import com.materiais.araujo.araujo_materiais_api.infra.security.TokenService;
 import com.materiais.araujo.araujo_materiais_api.model.usuario.CodigoAutorizacao;
@@ -75,13 +72,12 @@ class AutenticacaoServiceTest {
         when(usuarioRepository.findByEmail(any())).thenReturn(Optional.empty());
         when(usuarioRepository.findByCpf(any())).thenReturn(Optional.empty());
 
-        ResponseEntity<String> resposta = autenticacaoService.cadastrarUsuario(dto);
+        ResponseEntity<CadastroResponseDTO> resposta = autenticacaoService.cadastrarUsuario(dto);
 
         verify(usuarioRepository).save(any());
         verify(codigoAutorizacaoRepository).save(any());
         verify(emailService).enviarEmail(any(), any(), any());
 
-        assertTrue(resposta.getBody().contains("Cadastro realizado com sucesso"));
 
     }
 
@@ -109,9 +105,10 @@ class AutenticacaoServiceTest {
 
     }
 
+
     @Test
     @DisplayName("Sucesso ao validar usuario")
-    void validarUsuariocase1(){
+    void validarUsuariocase1() {
 
         Instant horaAtual = Instant.now();
 
@@ -136,7 +133,7 @@ class AutenticacaoServiceTest {
 
     @Test
     @DisplayName("Deve lancar CodigoDeValidacaoNaoValidoException")
-    void validarUsuariocase2(){
+    void validarUsuariocase2() {
 
         when(codigoAutorizacaoRepository.findByCodigo(any())).thenReturn(Optional.empty());
 
@@ -148,7 +145,7 @@ class AutenticacaoServiceTest {
 
     @Test
     @DisplayName("Deve lancar CodigoDeValidacaoExpiradoException")
-    void validarUsuariocase3(){
+    void validarUsuariocase3() {
 
         Instant horaAtual = Instant.now();
 
@@ -169,13 +166,13 @@ class AutenticacaoServiceTest {
 
     @Test
     @DisplayName("Sucesso ao realizar login")
-    void logincase1(){
+    void logincase1() {
 
         when(utilUsuario.obterUsuarioEmail(any())).thenReturn(usuario);
 
         usuario.setStatusUsuario(StatusUsuario.ATIVO);
 
-        ResponseEntity<TokenDTO> resposta =  autenticacaoService.login(loginDTO);
+        ResponseEntity<TokenDTO> resposta = autenticacaoService.login(loginDTO);
 
         verify(tokenService).gerarToken(any());
         assertEquals(HttpStatus.OK, resposta.getStatusCode());
@@ -184,7 +181,7 @@ class AutenticacaoServiceTest {
 
     @Test
     @DisplayName("Deve lancar UsuarioInativoException")
-    void logincase2(){
+    void logincase2() {
 
         usuario.setStatusUsuario(StatusUsuario.INATIVO);
 

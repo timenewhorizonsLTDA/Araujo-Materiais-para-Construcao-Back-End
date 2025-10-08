@@ -1,9 +1,6 @@
 package com.materiais.araujo.araujo_materiais_api.service.usuario;
 
-import com.materiais.araujo.araujo_materiais_api.DTO.usuario.CadastroDTO;
-import com.materiais.araujo.araujo_materiais_api.DTO.usuario.CodigoValidacaoDTO;
-import com.materiais.araujo.araujo_materiais_api.DTO.usuario.LoginDTO;
-import com.materiais.araujo.araujo_materiais_api.DTO.usuario.TokenDTO;
+import com.materiais.araujo.araujo_materiais_api.DTO.usuario.*;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.usuario.*;
 import com.materiais.araujo.araujo_materiais_api.infra.security.TokenService;
 import com.materiais.araujo.araujo_materiais_api.model.usuario.CodigoAutorizacao;
@@ -39,10 +36,7 @@ public class AutenticacaoService {
     private TokenService tokenService;
 
 
-    public AutenticacaoService(UsuarioRepository usuarioRepository,
-                               CodigoAutorizacaoRepository codigoAutorizacaoRepository,
-                               PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager,
-                               EmailService emailService, UtilUsuario utilUsuario, TokenService tokenService) {
+    public AutenticacaoService(UsuarioRepository usuarioRepository, CodigoAutorizacaoRepository codigoAutorizacaoRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, EmailService emailService, UtilUsuario utilUsuario, TokenService tokenService) {
         this.usuarioRepository = usuarioRepository;
         this.codigoAutorizacaoRepository = codigoAutorizacaoRepository;
         this.passwordEncoder = passwordEncoder;
@@ -52,7 +46,7 @@ public class AutenticacaoService {
         this.tokenService = tokenService;
     }
 
-    public ResponseEntity<String> cadastrarUsuario(CadastroDTO dto) {
+    public ResponseEntity<CadastroResponseDTO> cadastrarUsuario(CadastroDTO dto) {
         if (this.usuarioRepository.findByEmail(dto.email()).isPresent()) {
             throw new EmailJaCadastradoException();
         }
@@ -75,13 +69,38 @@ public class AutenticacaoService {
         codigoAutorizacaoRepository.save(codigoAutorizacao);
         emailService.enviarEmail(usuario.getEmail(), "Codigo de validacao", "O seu codigo de validacao é: " + codigoAutorizacao.getCodigo());
 
-        return ResponseEntity.ok().body("Cadastro realizado com sucesso, agora verifique o seu email!");
+        CadastroResponseDTO responseDTO = new CadastroResponseDTO(usuario.getId(), usuario.getNome(), usuario.getCpf(), usuario.getEmail());
+
+        return ResponseEntity.ok().body(responseDTO);
     }
+
+
+    public ResponseEntity<String> reenviarCodigo(Integer usuarioID) {
+
+        CodigoAutorizacao codigoAutorizacao = codigoAutorizacaoRepository.findById(usuarioID).orElseThrow(() -> new UsuarioNaoRealizouCadastroException());
+
+        Usuario usuario = codigoAutorizacao.getUsuario();
+
+        String codigo = UUID.randomUUID().toString().substring(0, 6);
+        Instant horaioEnvio = Instant.now();
+        Instant horarioDeExpiracao = horaioEnvio.plusMillis(600000);
+
+        codigoAutorizacao.setCodigo(codigo);
+        codigoAutorizacao.setHorarioDeEnvio(horaioEnvio);
+        codigoAutorizacao.setHorarioDeExpiracao(horarioDeExpiracao);
+        codigoAutorizacaoRepository.save(codigoAutorizacao);
+
+
+        emailService.enviarEmail(usuario.getEmail(), "Codigo de validacao", "O novo codigo de validacao é: " + codigoAutorizacao.getCodigo());
+
+        return ResponseEntity.ok().body("Condigo reenviado");
+
+    }
+
 
     public ResponseEntity<String> validarUsuario(CodigoValidacaoDTO dto) {
 
-        CodigoAutorizacao codigoAutorizacao = codigoAutorizacaoRepository.findByCodigo(dto.codigo())
-                .orElseThrow(() -> new CodigoDeValidacaoNaoValidoException());
+        CodigoAutorizacao codigoAutorizacao = codigoAutorizacaoRepository.findByCodigo(dto.codigo()).orElseThrow(() -> new CodigoDeValidacaoNaoValidoException());
 
         Usuario usuario = codigoAutorizacao.getUsuario();
 
@@ -105,11 +124,11 @@ public class AutenticacaoService {
         return ResponseEntity.ok().body("Validacao concluida com sucesso, agora realize o login");
     }
 
-    public ResponseEntity<TokenDTO> login(LoginDTO dto){
+    public ResponseEntity<TokenDTO> login(LoginDTO dto) {
 
         Usuario usuario = utilUsuario.obterUsuarioEmail(dto.email());
 
-        if(usuario.getStatusUsuario() == StatusUsuario.INATIVO){
+        if (usuario.getStatusUsuario() == StatusUsuario.INATIVO) {
             throw new UsuarioInativoException();
         }
 
@@ -124,7 +143,6 @@ public class AutenticacaoService {
         return ResponseEntity.ok().body(tokenDTO);
 
     }
-
 
 
 }

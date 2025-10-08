@@ -1,11 +1,9 @@
 package com.materiais.araujo.araujo_materiais_api.controller.usuario;
 
-import com.materiais.araujo.araujo_materiais_api.DTO.usuario.CadastroDTO;
-import com.materiais.araujo.araujo_materiais_api.DTO.usuario.CodigoValidacaoDTO;
-import com.materiais.araujo.araujo_materiais_api.DTO.usuario.LoginDTO;
-import com.materiais.araujo.araujo_materiais_api.DTO.usuario.TokenDTO;
+import com.materiais.araujo.araujo_materiais_api.DTO.usuario.*;
 import com.materiais.araujo.araujo_materiais_api.service.usuario.AutenticacaoService;
 import jakarta.validation.Valid;
+import jakarta.websocket.server.PathParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,9 +18,15 @@ public class AutenticacaoController {
     }
 
     @PostMapping
-    public ResponseEntity<String> cadastrarUsuario(@RequestBody @Valid CadastroDTO dto) {
+    public ResponseEntity<CadastroResponseDTO> cadastrarUsuario(@RequestBody @Valid CadastroDTO dto) {
         return autenticacaoService.cadastrarUsuario(dto);
     }
+
+    @PostMapping("/reenviar/{id}")
+    public ResponseEntity<String> reenviarCodigo(@PathVariable("id") Integer usuarioID){
+        return autenticacaoService.reenviarCodigo(usuarioID);
+    }
+
 
     @PutMapping
     public ResponseEntity<String> validarUsuario(@RequestBody @Valid CodigoValidacaoDTO dto) {
