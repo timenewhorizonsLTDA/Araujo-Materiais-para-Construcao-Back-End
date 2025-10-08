@@ -72,5 +72,11 @@ public class Handler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(respostaErro.getStatus()).body(respostaErro);
     }
 
+    @ExceptionHandler(UsuarioNaoRealizouCadastroException.class)
+    public ResponseEntity<RespostaErro> UsuarioNaoRealizouCadastroHandler(UsuarioNaoRealizouCadastroException e) {
+        RespostaErro respostaErro = new RespostaErro(HttpStatus.BAD_REQUEST, e.getMessage());
+        return ResponseEntity.status(respostaErro.getStatus()).body(respostaErro);
+    }
+
 
 }

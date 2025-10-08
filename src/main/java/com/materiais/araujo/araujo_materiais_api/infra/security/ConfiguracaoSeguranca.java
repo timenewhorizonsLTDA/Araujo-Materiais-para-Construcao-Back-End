@@ -30,7 +30,6 @@ public class ConfiguracaoSeguranca {
                 .csrf(c -> c.disable())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(a -> a
-                        .requestMatchers(HttpMethod.GET, "/sla").authenticated()
                         .anyRequest().permitAll())
                 .addFilterBefore(filtroSeguranca, UsernamePasswordAuthenticationFilter.class)
                 .build();
