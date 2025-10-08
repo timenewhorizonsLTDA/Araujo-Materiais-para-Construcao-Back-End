@@ -33,13 +33,12 @@ public class Produto {
     public Produto() {
     }
 
-    public Produto(String nome, String codigo, Double preco, Integer quantidade, Integer estoqueMinimo, Orcamento orcamento) {
+    public Produto(String nome, String codigo, Double preco, Integer quantidade, Integer estoqueMinimo) {
         this.nome = nome;
         this.codigo = codigo;
         this.preco = preco;
         this.quantidade = quantidade;
         this.estoqueMinimo = estoqueMinimo;
-        this.orcamento = orcamento;
     }
 
     @Override
