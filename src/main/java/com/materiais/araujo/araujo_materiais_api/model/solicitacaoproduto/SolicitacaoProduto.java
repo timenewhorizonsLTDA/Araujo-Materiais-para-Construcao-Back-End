@@ -1,12 +1,10 @@
 package com.materiais.araujo.araujo_materiais_api.model.solicitacaoproduto;
 
-import com.materiais.araujo.araujo_materiais_api.model.produto.Produto;
+import com.materiais.araujo.araujo_materiais_api.model.orcamento.Orcamento;
 import com.materiais.araujo.araujo_materiais_api.model.usuario.Usuario;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -20,9 +18,9 @@ public class SolicitacaoProduto {
     @JoinColumn(nullable = false)
     private Usuario cliente;
 
-    @OneToMany
-    @Column(nullable = false)
-    private List<Produto> produtos;
+    @OneToOne
+    @JoinColumn(nullable = false)
+    private Orcamento orcamento;
 
     @Column(nullable = false)
     private LocalDateTime dataHoraSolicitou;
@@ -43,11 +41,11 @@ public class SolicitacaoProduto {
     public SolicitacaoProduto() {
     }
 
-    public SolicitacaoProduto(Usuario cliente, List<Produto> produtos, LocalDateTime dataHoraSolicitou,
-                              LocalDateTime dataHoraEntregue, String endereco, String contato,
-                              StatusSolicitacao statusSolicitacao) {
+    public SolicitacaoProduto(Usuario cliente, Orcamento orcamento, LocalDateTime dataHoraSolicitou,
+                              LocalDateTime dataHoraEntregue, String endereco,
+                              String contato, StatusSolicitacao statusSolicitacao) {
         this.cliente = cliente;
-        this.produtos = produtos;
+        this.orcamento = orcamento;
         this.dataHoraSolicitou = dataHoraSolicitou;
         this.dataHoraEntregue = dataHoraEntregue;
         this.endereco = endereco;
@@ -55,17 +53,16 @@ public class SolicitacaoProduto {
         this.statusSolicitacao = statusSolicitacao;
     }
 
-
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         SolicitacaoProduto that = (SolicitacaoProduto) o;
-        return Objects.equals(cliente, that.cliente) && Objects.equals(produtos, that.produtos) && Objects.equals(dataHoraSolicitou, that.dataHoraSolicitou) && Objects.equals(dataHoraEntregue, that.dataHoraEntregue) && Objects.equals(endereco, that.endereco) && Objects.equals(contato, that.contato) && statusSolicitacao == that.statusSolicitacao;
+        return Objects.equals(cliente, that.cliente) && Objects.equals(orcamento, that.orcamento) && Objects.equals(dataHoraSolicitou, that.dataHoraSolicitou) && Objects.equals(dataHoraEntregue, that.dataHoraEntregue) && Objects.equals(endereco, that.endereco) && Objects.equals(contato, that.contato) && statusSolicitacao == that.statusSolicitacao;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(cliente, produtos, dataHoraSolicitou, dataHoraEntregue, endereco, contato, statusSolicitacao);
+        return Objects.hash(cliente, orcamento, dataHoraSolicitou, dataHoraEntregue, endereco, contato, statusSolicitacao);
     }
 
     public Integer getId() {
@@ -124,11 +121,13 @@ public class SolicitacaoProduto {
         this.statusSolicitacao = statusSolicitacao;
     }
 
-    public List<Produto> getProdutos() {
-        return produtos;
+    public Orcamento getOrcamento() {
+        return orcamento;
     }
 
-    public void setProdutos(List<Produto> produtos) {
-        this.produtos = produtos;
+    public void setOrcamento(Orcamento orcamento) {
+        this.orcamento = orcamento;
     }
+
+
 }
