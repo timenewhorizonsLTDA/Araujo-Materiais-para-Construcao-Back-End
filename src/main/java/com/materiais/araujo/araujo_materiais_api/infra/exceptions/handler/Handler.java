@@ -1,5 +1,6 @@
 package com.materiais.araujo.araujo_materiais_api.infra.exceptions.handler;
 
+import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.gerente.FuncionarioJaExistenteException;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.usuario.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -74,6 +75,12 @@ public class Handler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(UsuarioNaoRealizouCadastroException.class)
     public ResponseEntity<RespostaErro> UsuarioNaoRealizouCadastroHandler(UsuarioNaoRealizouCadastroException e) {
+        RespostaErro respostaErro = new RespostaErro(HttpStatus.BAD_REQUEST, e.getMessage());
+        return ResponseEntity.status(respostaErro.getStatus()).body(respostaErro);
+    }
+
+    @ExceptionHandler(FuncionarioJaExistenteException.class)
+    public ResponseEntity<RespostaErro> FuncionarioJaExistenteHandler(FuncionarioJaExistenteException e) {
         RespostaErro respostaErro = new RespostaErro(HttpStatus.BAD_REQUEST, e.getMessage());
         return ResponseEntity.status(respostaErro.getStatus()).body(respostaErro);
     }
