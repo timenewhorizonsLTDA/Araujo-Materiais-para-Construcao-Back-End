@@ -22,9 +22,14 @@ public class AutenticacaoController {
         return autenticacaoService.cadastrarUsuario(dto);
     }
 
-    @PostMapping("/reenviar/{id}")
+    @PutMapping("/reenviar/{id}")
     public ResponseEntity<String> reenviarCodigo(@PathVariable("id") Integer usuarioID){
         return autenticacaoService.reenviarCodigo(usuarioID);
+    }
+
+    @PutMapping("/recuperaracesso")
+    public ResponseEntity<String> recuperarAcesso(@RequestBody @Valid RecuperarAcessoDTO dto){
+        return autenticacaoService.recuperarAcesso(dto);
     }
 
 

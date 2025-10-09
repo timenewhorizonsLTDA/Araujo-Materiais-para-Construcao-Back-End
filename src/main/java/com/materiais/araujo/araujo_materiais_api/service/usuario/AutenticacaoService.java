@@ -124,6 +124,24 @@ public class AutenticacaoService {
         return ResponseEntity.ok().body("Validacao concluida com sucesso, agora realize o login");
     }
 
+
+    public ResponseEntity<String> recuperarAcesso(RecuperarAcessoDTO dto){
+
+        Usuario usuario = utilUsuario.obterUsuarioEmail(dto.email());
+
+        String novaSenha = UUID.randomUUID().toString().substring(0, 4);
+        String senhaCriptografada = passwordEncoder.encode(novaSenha);
+
+        usuario.setSenha(senhaCriptografada);
+
+        usuarioRepository.save(usuario);
+        emailService.enviarEmail(usuario.getEmail(), "Nova senha", "A sua nova senha é: " + novaSenha);
+        return ResponseEntity.ok().body("Verifique o seu email");
+
+    }
+
+
+
     public ResponseEntity<TokenDTO> login(LoginDTO dto) {
 
         Usuario usuario = utilUsuario.obterUsuarioEmail(dto.email());
