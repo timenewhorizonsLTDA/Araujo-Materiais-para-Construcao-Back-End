@@ -1,21 +1,21 @@
 package com.materiais.araujo.araujo_materiais_api.service.gerente;
 
-import com.materiais.araujo.araujo_materiais_api.DTO.gerente.CadastrarFuncionarioDTO;
-import com.materiais.araujo.araujo_materiais_api.DTO.gerente.CadastrarFuncionarioResponseDTO;
-import com.materiais.araujo.araujo_materiais_api.DTO.gerente.EditarFuncionarioDTO;
-import com.materiais.araujo.araujo_materiais_api.DTO.gerente.EditarFuncionarioResponseDTO;
+import com.materiais.araujo.araujo_materiais_api.DTO.gerente.*;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.gerente.DadosRepitidosEception;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.gerente.FuncionarioJaExistenteException;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.gerente.FuncionarioNaoEncontradoException;
+import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.gerente.SenhaInvalidaException;
 import com.materiais.araujo.araujo_materiais_api.model.usuario.RoleUsuario;
 import com.materiais.araujo.araujo_materiais_api.model.usuario.StatusUsuario;
 import com.materiais.araujo.araujo_materiais_api.model.usuario.Usuario;
 import com.materiais.araujo.araujo_materiais_api.repository.usuario.UsuarioRepository;
 import com.materiais.araujo.araujo_materiais_api.service.usuario.EmailService;
+import com.materiais.araujo.araujo_materiais_api.service.usuario.UtilUsuario;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -27,10 +27,13 @@ public class GerenteService {
 
     private PasswordEncoder passwordEncoder;
 
-    public GerenteService(UsuarioRepository usuarioRepository, EmailService emailService, PasswordEncoder passwordEncoder) {
+    private UtilUsuario utilUsuario;
+
+    public GerenteService(UsuarioRepository usuarioRepository, EmailService emailService, PasswordEncoder passwordEncoder, UtilUsuario utilUsuario) {
         this.usuarioRepository = usuarioRepository;
         this.emailService = emailService;
         this.passwordEncoder = passwordEncoder;
+        this.utilUsuario = utilUsuario;
     }
 
     public ResponseEntity<CadastrarFuncionarioResponseDTO> cadastrarFuncionario(CadastrarFuncionarioDTO dto) {
@@ -60,35 +63,35 @@ public class GerenteService {
     }
 
 
-    public ResponseEntity<EditarFuncionarioResponseDTO> editarFuncionario(Integer idFuncionario, EditarFuncionarioDTO dto){
+    public ResponseEntity<EditarFuncionarioResponseDTO> editarFuncionario(Integer idFuncionario, EditarFuncionarioDTO dto) {
 
         Usuario funcionario = usuarioRepository.findById(idFuncionario).orElseThrow(() -> new FuncionarioNaoEncontradoException());
 
-        if(funcionario.getRole() != RoleUsuario.FUNCIONARIO){
+        if (funcionario.getRole() != RoleUsuario.FUNCIONARIO) {
             throw new FuncionarioNaoEncontradoException();
         }
 
-        if(funcionario.getNome().equals(dto.nome())){
+        if (funcionario.getNome().equals(dto.nome())) {
             throw new DadosRepitidosEception();
         }
 
-        if(funcionario.getEmail().equals(dto.email())){
+        if (funcionario.getEmail().equals(dto.email())) {
             throw new DadosRepitidosEception();
         }
 
-        if(funcionario.getTelefone().equals(dto.contato())){
+        if (funcionario.getTelefone().equals(dto.contato())) {
             throw new DadosRepitidosEception();
         }
 
-        if(!dto.nome().isEmpty()){
+        if (!dto.nome().isEmpty()) {
             funcionario.setNome(dto.nome());
         }
 
-        if(!dto.email().isEmpty()){
+        if (!dto.email().isEmpty()) {
             funcionario.setEmail(dto.email());
         }
 
-        if(!dto.contato().isEmpty()){
+        if (!dto.contato().isEmpty()) {
             funcionario.setTelefone(dto.contato());
         }
 
@@ -101,4 +104,43 @@ public class GerenteService {
 
 
     }
+
+    public ResponseEntity<List<BuscarFuncionarioDTO>> buscarTodosFuncionarios() {
+
+        List<Usuario> usuarios = usuarioRepository.findAllByRole(RoleUsuario.FUNCIONARIO);
+
+        List<BuscarFuncionarioDTO> usuariosDTO = usuarios.stream().map(e -> new BuscarFuncionarioDTO(e.getId(), e.getNome(), e.getEmail(), e.getTelefone())).toList();
+
+        return ResponseEntity.ok().body(usuariosDTO);
+
+
+    }
+
+
+    public ResponseEntity<List<BuscarFuncionarioDTO>> buscarFuncionariosPorNome(BuscarFuncionarioNomeDTO dto){
+
+        List<Usuario> usuarios = usuarioRepository.findByRoleAndNomeContainingIgnoreCase(RoleUsuario.FUNCIONARIO, dto.nome());
+
+        List<BuscarFuncionarioDTO> usuariosDTO = usuarios.stream().map(e -> new BuscarFuncionarioDTO(e.getId(), e.getNome(),
+                e.getEmail(), e.getTelefone())).toList();
+
+        return ResponseEntity.ok().body(usuariosDTO);
+    }
+
+    public void deletarFuncionario(SenhaDTO senhaGerente, Integer idFuncionario){
+
+        Usuario gerente = utilUsuario.obterUsuarioDaVez();
+
+        if(!passwordEncoder.matches(senhaGerente.senha(), gerente.getSenha())){
+            throw new SenhaInvalidaException();
+        }
+
+        Usuario funcionario = usuarioRepository.findByIdAndRole(idFuncionario, RoleUsuario.FUNCIONARIO)
+                .orElseThrow(() -> new FuncionarioNaoEncontradoException());
+
+        usuarioRepository.delete(funcionario);
+
+    }
+
+
 }
