@@ -112,10 +112,4 @@ public class Handler extends ResponseEntityExceptionHandler {
         RespostaErro respostaErro = new RespostaErro(HttpStatus.BAD_REQUEST, e.getMessage());
         return ResponseEntity.status(respostaErro.getStatus()).body(respostaErro);
     }
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<RespostaErro> genericHandler(Exception e) {
-        RespostaErro respostaErro = new RespostaErro(HttpStatus.INTERNAL_SERVER_ERROR, "Erro interno: " + e.getMessage());
-        return ResponseEntity.status(respostaErro.getStatus()).body(respostaErro);
-    }
 }
