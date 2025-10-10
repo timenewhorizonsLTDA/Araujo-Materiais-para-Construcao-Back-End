@@ -9,5 +9,6 @@ import org.hibernate.validator.constraints.br.CPF;
 public record CadastroDTO(@NotBlank String nome
         ,@NotBlank @CPF String cpf
         ,@Email String email
+        ,@NotBlank String contato
         ,@NotBlank String senha) {
 }

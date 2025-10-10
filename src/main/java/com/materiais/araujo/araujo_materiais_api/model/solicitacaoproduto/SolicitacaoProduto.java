@@ -31,8 +31,6 @@ public class SolicitacaoProduto {
     @Column(nullable = false)
     private String endereco;
 
-    @Column(nullable = false)
-    private String contato;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -42,14 +40,13 @@ public class SolicitacaoProduto {
     }
 
     public SolicitacaoProduto(Usuario cliente, Orcamento orcamento, LocalDateTime dataHoraSolicitou,
-                              LocalDateTime dataHoraEntregue, String endereco,
-                              String contato, StatusSolicitacao statusSolicitacao) {
+                              LocalDateTime dataHoraEntregue, String endereco
+            , StatusSolicitacao statusSolicitacao) {
         this.cliente = cliente;
         this.orcamento = orcamento;
         this.dataHoraSolicitou = dataHoraSolicitou;
         this.dataHoraEntregue = dataHoraEntregue;
         this.endereco = endereco;
-        this.contato = contato;
         this.statusSolicitacao = statusSolicitacao;
     }
 
@@ -57,12 +54,12 @@ public class SolicitacaoProduto {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         SolicitacaoProduto that = (SolicitacaoProduto) o;
-        return Objects.equals(cliente, that.cliente) && Objects.equals(orcamento, that.orcamento) && Objects.equals(dataHoraSolicitou, that.dataHoraSolicitou) && Objects.equals(dataHoraEntregue, that.dataHoraEntregue) && Objects.equals(endereco, that.endereco) && Objects.equals(contato, that.contato) && statusSolicitacao == that.statusSolicitacao;
+        return Objects.equals(cliente, that.cliente) && Objects.equals(orcamento, that.orcamento) && Objects.equals(dataHoraSolicitou, that.dataHoraSolicitou) && Objects.equals(dataHoraEntregue, that.dataHoraEntregue) && Objects.equals(endereco, that.endereco) && statusSolicitacao == that.statusSolicitacao;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(cliente, orcamento, dataHoraSolicitou, dataHoraEntregue, endereco, contato, statusSolicitacao);
+        return Objects.hash(cliente, orcamento, dataHoraSolicitou, dataHoraEntregue, endereco, statusSolicitacao);
     }
 
     public Integer getId() {
@@ -105,13 +102,6 @@ public class SolicitacaoProduto {
         this.endereco = endereco;
     }
 
-    public String getContato() {
-        return contato;
-    }
-
-    public void setContato(String contato) {
-        this.contato = contato;
-    }
 
     public StatusSolicitacao getStatusSolicitacao() {
         return statusSolicitacao;

@@ -29,9 +29,9 @@ public class GerenteService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public ResponseEntity<CadastrarFuncionarioResponseDTO> cadastrarFuncionario(CadastrarFuncionarioDTO dto){
+    public ResponseEntity<CadastrarFuncionarioResponseDTO> cadastrarFuncionario(CadastrarFuncionarioDTO dto) {
 
-        if(usuarioRepository.findByCpf(dto.cpf()).isPresent()){
+        if (usuarioRepository.findByCpf(dto.cpf()).isPresent()) {
             throw new FuncionarioJaExistenteException();
         }
 
@@ -40,16 +40,16 @@ public class GerenteService {
         String senhaCriptografada = passwordEncoder.encode(senhaFuncionario);
 
 
-        Usuario funcionario = new Usuario(dto.nome(), dto.cpf(), dto.email(), senhaCriptografada,
+        Usuario funcionario = new Usuario(dto.nome(), dto.cpf(), dto.email(), dto.contato(), senhaCriptografada,
                 RoleUsuario.FUNCIONARIO, StatusUsuario.ATIVO);
 
         usuarioRepository.save(funcionario);
         emailService.enviarEmail(funcionario.getEmail(), "Dados para login", "Email: "
-                + funcionario.getEmail() +  "\n" + "Senha: " + senhaFuncionario);
+                + funcionario.getEmail() + " Senha: " + senhaFuncionario);
 
         CadastrarFuncionarioResponseDTO responseDTO = new CadastrarFuncionarioResponseDTO(funcionario.getId(),
                 funcionario.getNome(),
-                funcionario.getEmail(), funcionario.getCpf());
+                funcionario.getEmail(), funcionario.getTelefone(), funcionario.getCpf());
 
         return ResponseEntity.ok().body(responseDTO);
 

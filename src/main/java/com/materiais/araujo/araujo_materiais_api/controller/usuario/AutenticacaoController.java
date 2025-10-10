@@ -17,7 +17,7 @@ public class AutenticacaoController {
         this.autenticacaoService = autenticacaoService;
     }
 
-    @PostMapping
+    @PostMapping("/cadastrar")
     public ResponseEntity<CadastroResponseDTO> cadastrarUsuario(@RequestBody @Valid CadastroDTO dto) {
         return autenticacaoService.cadastrarUsuario(dto);
     }
@@ -33,7 +33,7 @@ public class AutenticacaoController {
     }
 
 
-    @PutMapping
+    @PutMapping("/validar")
     public ResponseEntity<String> validarUsuario(@RequestBody @Valid CodigoValidacaoDTO dto) {
         return autenticacaoService.validarUsuario(dto);
     }

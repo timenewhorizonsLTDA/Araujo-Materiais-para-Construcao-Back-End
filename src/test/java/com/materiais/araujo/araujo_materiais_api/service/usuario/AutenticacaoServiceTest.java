@@ -54,7 +54,7 @@ class AutenticacaoServiceTest {
     private AutenticacaoService autenticacaoService;
 
     //registro
-    private CadastroDTO dto = new CadastroDTO("vitor", "70345324", "vitor@gmail.com", "123");
+    private CadastroDTO dto = new CadastroDTO("vitor", "70345324", "vitor@gmail.com", "123", "1234");
     private Usuario usuario = new Usuario();
 
     //validacao

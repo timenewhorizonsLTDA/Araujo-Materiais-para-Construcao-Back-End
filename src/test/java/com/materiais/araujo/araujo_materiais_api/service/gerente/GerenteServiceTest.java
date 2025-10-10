@@ -39,7 +39,7 @@ class GerenteServiceTest {
     @DisplayName("Sucesso ao cadastrar funcionario")
     void cadastrarFuncionarioCase1() {
 
-        CadastrarFuncionarioDTO dto = new CadastrarFuncionarioDTO("vitor", "1212121", "dsdsdsdsds");
+        CadastrarFuncionarioDTO dto = new CadastrarFuncionarioDTO("vitor", "1212121", "dsdsdsdsds", "123455");
 
         when(usuarioRepository.findByCpf(any())).thenReturn(Optional.empty());
 
@@ -58,7 +58,7 @@ class GerenteServiceTest {
         Usuario funcionario = new Usuario();
         funcionario.setCpf("772737374");
 
-        CadastrarFuncionarioDTO dto = new CadastrarFuncionarioDTO("vitor", funcionario.getCpf(), "dsdsdsdsds");
+        CadastrarFuncionarioDTO dto = new CadastrarFuncionarioDTO("vitor", funcionario.getCpf(), "dsdsdsdsds", "12344");
 
         when(usuarioRepository.findByCpf(any())).thenReturn(Optional.of(funcionario));
 
