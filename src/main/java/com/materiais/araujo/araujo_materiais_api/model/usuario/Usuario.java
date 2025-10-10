@@ -26,6 +26,9 @@ public class Usuario implements UserDetails {
     private String email;
 
     @Column(nullable = false)
+    private String telefone;
+
+    @Column(nullable = false)
     private String senha;
 
     @Column(nullable = false)
@@ -40,11 +43,12 @@ public class Usuario implements UserDetails {
     public Usuario() {
     }
 
-    public Usuario(String nome, String cpf, String email, String senha, RoleUsuario role, StatusUsuario statusUsuario) {
+    public Usuario(String nome, String cpf, String email, String telefone, String senha, RoleUsuario role, StatusUsuario statusUsuario) {
         this.nome = nome;
         this.cpf = cpf;
         this.email = email;
         this.senha = senha;
+        this.telefone = telefone;
         this.role = role;
         this.statusUsuario = statusUsuario;
     }
@@ -53,12 +57,12 @@ public class Usuario implements UserDetails {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Usuario usuario = (Usuario) o;
-        return Objects.equals(nome, usuario.nome) && Objects.equals(cpf, usuario.cpf) && Objects.equals(email, usuario.email) && Objects.equals(senha, usuario.senha) && role == usuario.role && statusUsuario == usuario.statusUsuario;
+        return Objects.equals(nome, usuario.nome) && Objects.equals(cpf, usuario.cpf) && Objects.equals(email, usuario.email) && Objects.equals(telefone, usuario.telefone) && Objects.equals(senha, usuario.senha) && role == usuario.role && statusUsuario == usuario.statusUsuario;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(nome, cpf, email, senha, role, statusUsuario);
+        return Objects.hash(nome, cpf, email, telefone, senha, role, statusUsuario);
     }
 
     public Integer getId() {
@@ -115,6 +119,14 @@ public class Usuario implements UserDetails {
 
     public void setStatusUsuario(StatusUsuario statusUsuario) {
         this.statusUsuario = statusUsuario;
+    }
+
+    public String getTelefone() {
+        return telefone;
+    }
+
+    public void setTelefone(String telefone) {
+        this.telefone = telefone;
     }
 
     @Override

@@ -56,7 +56,7 @@ public class AutenticacaoService {
 
         String senhaCriptografada = passwordEncoder.encode(dto.senha());
 
-        Usuario usuario = new Usuario(dto.nome(), dto.cpf(), dto.email(), senhaCriptografada, RoleUsuario.CLIENTE, StatusUsuario.INATIVO);
+        Usuario usuario = new Usuario(dto.nome(), dto.cpf(), dto.email(), dto.contato(), senhaCriptografada, RoleUsuario.CLIENTE, StatusUsuario.INATIVO);
 
         String codigo = UUID.randomUUID().toString().substring(0, 6);
         Instant horaioEnvio = Instant.now();
@@ -69,7 +69,7 @@ public class AutenticacaoService {
         codigoAutorizacaoRepository.save(codigoAutorizacao);
         emailService.enviarEmail(usuario.getEmail(), "Codigo de validacao", "O seu codigo de validacao é: " + codigoAutorizacao.getCodigo());
 
-        CadastroResponseDTO responseDTO = new CadastroResponseDTO(usuario.getId(), usuario.getNome(), usuario.getCpf(), usuario.getEmail());
+        CadastroResponseDTO responseDTO = new CadastroResponseDTO(usuario.getId(), usuario.getNome(), usuario.getCpf(), usuario.getEmail(), dto.contato());
 
         return ResponseEntity.ok().body(responseDTO);
     }

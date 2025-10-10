@@ -19,7 +19,7 @@ public class GerenteController {
         this.gerenteService = gerenteService;
     }
 
-    @PostMapping
+    @PostMapping("/adicionar")
     public ResponseEntity<CadastrarFuncionarioResponseDTO> cadastrarFuncionario(@RequestBody CadastrarFuncionarioDTO dto){
         return gerenteService.cadastrarFuncionario(dto);
     }

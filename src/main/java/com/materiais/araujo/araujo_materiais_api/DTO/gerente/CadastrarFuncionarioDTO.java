@@ -4,5 +4,5 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import org.hibernate.validator.constraints.br.CPF;
 
-public record CadastrarFuncionarioDTO(@NotBlank String nome, @CPF String cpf, @Email String email) {
+public record CadastrarFuncionarioDTO(@NotBlank String nome, @CPF String cpf, @Email String email, @NotBlank String contato) {
 }
