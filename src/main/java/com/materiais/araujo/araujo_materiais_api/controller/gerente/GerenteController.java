@@ -24,7 +24,7 @@ public class GerenteController {
     }
 
     @PutMapping("/editar/{id}")
-    public ResponseEntity<EditarFuncionarioResponseDTO> editarFuncionario(@PathVariable Integer id, @RequestBody EditarFuncionarioDTO dto){
+    public ResponseEntity<EditarFuncionarioResponseDTO> editarFuncionario(@PathVariable(name = "id") Integer id, @RequestBody EditarFuncionarioDTO dto){
         return gerenteService.editarFuncionario(id, dto);
     }
 }
