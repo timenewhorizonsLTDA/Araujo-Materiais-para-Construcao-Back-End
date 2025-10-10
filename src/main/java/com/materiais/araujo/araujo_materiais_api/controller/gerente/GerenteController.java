@@ -27,4 +27,6 @@ public class GerenteController {
     public ResponseEntity<EditarFuncionarioResponseDTO> editarFuncionario(@PathVariable(name = "id") Integer id, @RequestBody EditarFuncionarioDTO dto){
         return gerenteService.editarFuncionario(id, dto);
     }
+
+
 }
