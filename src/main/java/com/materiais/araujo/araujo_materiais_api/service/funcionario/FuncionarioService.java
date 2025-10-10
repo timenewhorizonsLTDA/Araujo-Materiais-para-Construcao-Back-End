@@ -18,7 +18,7 @@ public class FuncionarioService {
     }
 
     @Transactional
-    public Produto addProduto(ProdutoDTO dto) {
+    public void addProduto(ProdutoDTO dto) {
         if (produtoRepository.existsByCodigo(dto.codigo())) {
             throw new ProdutoDuplicadoException("Já existe um produto com o código " + dto.codigo());
         }
@@ -48,6 +48,19 @@ public class FuncionarioService {
                 dto.tipo()
         );
 
-        return produtoRepository.save(produto);
+        produtoRepository.save(produto);
+    }
+
+    public ProdutoDTO getProdutoPorNome(String nome) {
+        Produto produto = produtoRepository.findByNome(nome).orElseThrow(() -> new RuntimeException());
+
+        return new ProdutoDTO(
+                produto.getNome(),
+                produto.getCodigo(),
+                produto.getPreco(),
+                produto.getQuantidade(),
+                produto.getEstoqueMinimo(),
+                produto.getTipo()
+        );
     }
 }
