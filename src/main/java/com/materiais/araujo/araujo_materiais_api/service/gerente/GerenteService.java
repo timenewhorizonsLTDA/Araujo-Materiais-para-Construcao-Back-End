@@ -2,7 +2,11 @@ package com.materiais.araujo.araujo_materiais_api.service.gerente;
 
 import com.materiais.araujo.araujo_materiais_api.DTO.gerente.CadastrarFuncionarioDTO;
 import com.materiais.araujo.araujo_materiais_api.DTO.gerente.CadastrarFuncionarioResponseDTO;
+import com.materiais.araujo.araujo_materiais_api.DTO.gerente.EditarFuncionarioDTO;
+import com.materiais.araujo.araujo_materiais_api.DTO.gerente.EditarFuncionarioResponseDTO;
+import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.gerente.DadosRepitidosEception;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.gerente.FuncionarioJaExistenteException;
+import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.gerente.FuncionarioNaoEncontradoException;
 import com.materiais.araujo.araujo_materiais_api.model.usuario.RoleUsuario;
 import com.materiais.araujo.araujo_materiais_api.model.usuario.StatusUsuario;
 import com.materiais.araujo.araujo_materiais_api.model.usuario.Usuario;
@@ -52,6 +56,49 @@ public class GerenteService {
                 funcionario.getEmail(), funcionario.getTelefone(), funcionario.getCpf());
 
         return ResponseEntity.ok().body(responseDTO);
+
+    }
+
+
+    public ResponseEntity<EditarFuncionarioResponseDTO> editarFuncionario(Integer idFuncionario, EditarFuncionarioDTO dto){
+
+        Usuario funcionario = usuarioRepository.findById(idFuncionario).orElseThrow(() -> new FuncionarioNaoEncontradoException());
+
+        if(funcionario.getRole() != RoleUsuario.FUNCIONARIO){
+            throw new FuncionarioNaoEncontradoException();
+        }
+
+        if(funcionario.getNome().equals(dto.nome())){
+            throw new DadosRepitidosEception();
+        }
+
+        if(funcionario.getEmail().equals(dto.email())){
+            throw new DadosRepitidosEception();
+        }
+
+        if(funcionario.getTelefone().equals(dto.contato())){
+            throw new DadosRepitidosEception();
+        }
+
+        if(!dto.nome().isEmpty()){
+            funcionario.setNome(dto.nome());
+        }
+
+        if(!dto.email().isEmpty()){
+            funcionario.setEmail(dto.email());
+        }
+
+        if(!dto.contato().isEmpty()){
+            funcionario.setTelefone(dto.contato());
+        }
+
+        usuarioRepository.save(funcionario);
+
+        EditarFuncionarioResponseDTO responseDTO = new EditarFuncionarioResponseDTO(funcionario.getId(), funcionario.getNome(),
+                funcionario.getEmail(), funcionario.getTelefone());
+
+        return ResponseEntity.ok().body(responseDTO);
+
 
     }
 }
