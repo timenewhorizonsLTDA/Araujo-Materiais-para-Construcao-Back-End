@@ -27,18 +27,22 @@ public class Produto {
     @Column(nullable = false)
     private Integer estoqueMinimo;
 
+    @Enumerated(EnumType.STRING)
+    private TipoProduto tipo;
+
     @ManyToOne
     private Orcamento orcamento;
 
     public Produto() {
     }
 
-    public Produto(String nome, String codigo, Double preco, Integer quantidade, Integer estoqueMinimo) {
+    public Produto(String nome, String codigo, Double preco, Integer quantidade, Integer estoqueMinimo, TipoProduto tipo) {
         this.nome = nome;
         this.codigo = codigo;
         this.preco = preco;
         this.quantidade = quantidade;
         this.estoqueMinimo = estoqueMinimo;
+        this.tipo = tipo;
     }
 
     @Override
@@ -109,5 +113,11 @@ public class Produto {
         this.orcamento = orcamento;
     }
 
+    public TipoProduto getTipo() {
+        return tipo;
+    }
 
+    public void setTipo(TipoProduto tipo) {
+        this.tipo = tipo;
+    }
 }
