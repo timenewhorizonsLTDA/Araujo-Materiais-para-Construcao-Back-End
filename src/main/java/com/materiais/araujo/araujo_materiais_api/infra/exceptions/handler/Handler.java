@@ -1,6 +1,9 @@
 package com.materiais.araujo.araujo_materiais_api.infra.exceptions.handler;
 
+import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.gerente.DadosRepitidosEception;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.gerente.FuncionarioJaExistenteException;
+import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.gerente.FuncionarioNaoEncontradoException;
+import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.gerente.SenhaInvalidaException;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.usuario.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -81,6 +84,24 @@ public class Handler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(FuncionarioJaExistenteException.class)
     public ResponseEntity<RespostaErro> FuncionarioJaExistenteHandler(FuncionarioJaExistenteException e) {
+        RespostaErro respostaErro = new RespostaErro(HttpStatus.BAD_REQUEST, e.getMessage());
+        return ResponseEntity.status(respostaErro.getStatus()).body(respostaErro);
+    }
+
+    @ExceptionHandler(FuncionarioNaoEncontradoException.class)
+    public ResponseEntity<RespostaErro> FuncionarioNaoEncontradoHandler(FuncionarioNaoEncontradoException e) {
+        RespostaErro respostaErro = new RespostaErro(HttpStatus.BAD_REQUEST, e.getMessage());
+        return ResponseEntity.status(respostaErro.getStatus()).body(respostaErro);
+    }
+
+    @ExceptionHandler(DadosRepitidosEception.class)
+    public ResponseEntity<RespostaErro> DadosRepitidoshandler(DadosRepitidosEception e) {
+        RespostaErro respostaErro = new RespostaErro(HttpStatus.BAD_REQUEST, e.getMessage());
+        return ResponseEntity.status(respostaErro.getStatus()).body(respostaErro);
+    }
+
+    @ExceptionHandler(SenhaInvalidaException.class)
+    public ResponseEntity<RespostaErro> SenhaInvalidaHandler(SenhaInvalidaException e) {
         RespostaErro respostaErro = new RespostaErro(HttpStatus.BAD_REQUEST, e.getMessage());
         return ResponseEntity.status(respostaErro.getStatus()).body(respostaErro);
     }

@@ -1,16 +1,24 @@
 package com.materiais.araujo.araujo_materiais_api.service.gerente;
 
 import com.materiais.araujo.araujo_materiais_api.DTO.gerente.CadastrarFuncionarioDTO;
+import com.materiais.araujo.araujo_materiais_api.DTO.gerente.EditarFuncionarioDTO;
+import com.materiais.araujo.araujo_materiais_api.DTO.gerente.SenhaDTO;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.gerente.FuncionarioJaExistenteException;
+import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.gerente.FuncionarioNaoEncontradoException;
+import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.gerente.SenhaInvalidaException;
+import com.materiais.araujo.araujo_materiais_api.model.usuario.RoleUsuario;
+import com.materiais.araujo.araujo_materiais_api.model.usuario.StatusUsuario;
 import com.materiais.araujo.araujo_materiais_api.model.usuario.Usuario;
 import com.materiais.araujo.araujo_materiais_api.repository.usuario.UsuarioRepository;
 import com.materiais.araujo.araujo_materiais_api.service.usuario.EmailService;
+import com.materiais.araujo.araujo_materiais_api.service.usuario.UtilUsuario;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
@@ -30,6 +38,9 @@ class GerenteServiceTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private UtilUsuario utilUsuario;
 
     @InjectMocks
     private GerenteService gerenteService;
@@ -67,5 +78,115 @@ class GerenteServiceTest {
         verify(emailService, never()).enviarEmail(any(),any(),any());
         verify(usuarioRepository, never()).save(any());
 
+    }
+
+    @Test
+    @DisplayName("Sucesso ao editar funcionario")
+    void editarFuncionarioCase1(){
+
+        Integer id = 1;
+
+        Usuario funcionario = new Usuario();
+        funcionario.setNome("vitor");
+        funcionario.setEmail("vitor@gamaus");
+        funcionario.setTelefone("122342323");
+        funcionario.setRole(RoleUsuario.FUNCIONARIO);
+
+        when(usuarioRepository.findById(id)).thenReturn(Optional.of(funcionario));
+
+
+        EditarFuncionarioDTO editarFuncionarioDTO = new EditarFuncionarioDTO("garcia", "garcia@dddd", "2837744");
+
+        gerenteService.editarFuncionario(id, editarFuncionarioDTO);
+
+        verify(usuarioRepository).save(any());
+
+
+    }
+
+    @Test
+    @DisplayName("Deve lancar FuncionarioNaoEncontradoException")
+    void editarFuncionarioCase2(){
+
+        EditarFuncionarioDTO editarFuncionarioDTO = new EditarFuncionarioDTO("garcia", "garcia@dddd", "2837744");
+
+        when(usuarioRepository.findById(any())).thenReturn(Optional.empty());
+
+
+        assertThrows(FuncionarioNaoEncontradoException.class, () -> gerenteService.editarFuncionario(1,
+                editarFuncionarioDTO));
+
+        verify(usuarioRepository, never()).save(any());
+
+    }
+
+    @Test
+    @DisplayName("Sucesso ao deletar funcionario")
+    void deletarFuncionarioCase1(){
+
+        String senhaCriptografada = passwordEncoder.encode("123");
+
+        Usuario gerente = new Usuario("vitor", "2234455", "ddbsdbsdbu", "23343434",
+                senhaCriptografada, RoleUsuario.GERENTE, StatusUsuario.ATIVO );
+
+        Usuario funcionario = new Usuario();
+        funcionario.setRole(RoleUsuario.FUNCIONARIO);
+
+
+        SenhaDTO senhaDTO = new SenhaDTO("123");
+
+        when(utilUsuario.obterUsuarioDaVez()).thenReturn(gerente);
+
+        when(usuarioRepository.findByIdAndRole(any(),any())).thenReturn(Optional.of(funcionario));
+        when(passwordEncoder.matches(any(),any())).thenReturn(true);
+
+        gerenteService.deletarFuncionario(senhaDTO,1);
+
+        verify(usuarioRepository).delete(any());
+    }
+
+    @Test
+    @DisplayName("Deve lancar SenhaInvalidaException")
+    void deletarFuncionarioCase2(){
+
+        String senhaCriptografada = passwordEncoder.encode("123");
+
+        Usuario gerente = new Usuario("vitor", "2234455", "ddbsdbsdbu", "23343434",
+                senhaCriptografada, RoleUsuario.GERENTE, StatusUsuario.ATIVO );
+
+
+        SenhaDTO senhaDTO = new SenhaDTO("123");
+
+        when(utilUsuario.obterUsuarioDaVez()).thenReturn(gerente);
+
+        when(passwordEncoder.matches(any(),any())).thenReturn(false);
+
+       assertThrows(SenhaInvalidaException.class, () ->  gerenteService.deletarFuncionario(senhaDTO,1));
+
+        verify(usuarioRepository, never()).delete(any());
+    }
+
+    @Test
+    @DisplayName("Deve lancar FuncionarioNaoEncontradoException")
+    void deletarFuncionarioCase3(){
+
+        String senhaCriptografada = passwordEncoder.encode("123");
+
+        Usuario gerente = new Usuario("vitor", "2234455", "ddbsdbsdbu", "23343434",
+                senhaCriptografada, RoleUsuario.GERENTE, StatusUsuario.ATIVO );
+
+
+        SenhaDTO senhaDTO = new SenhaDTO("123");
+
+        when(utilUsuario.obterUsuarioDaVez()).thenReturn(gerente);
+
+        when(passwordEncoder.matches(any(),any())).thenReturn(true);
+
+        when(usuarioRepository.findByIdAndRole(any(),any())).thenReturn(Optional.empty());
+
+
+        assertThrows(FuncionarioNaoEncontradoException.class, () ->  gerenteService.deletarFuncionario(senhaDTO,1));
+
+        verify(usuarioRepository, never()).delete(any());
     }
 }
