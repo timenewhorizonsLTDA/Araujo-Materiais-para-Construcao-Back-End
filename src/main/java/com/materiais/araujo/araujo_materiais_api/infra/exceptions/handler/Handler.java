@@ -2,6 +2,10 @@ package com.materiais.araujo.araujo_materiais_api.infra.exceptions.handler;
 
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.gerente.DadosRepitidosEception;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.gerente.FuncionarioJaExistenteException;
+import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.produto.EstoqueInvalidoException;
+import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.produto.PrecoInvalidoException;
+import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.produto.ProdutoDuplicadoException;
+import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.produto.ProdutoNaoEncontradoException;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.gerente.FuncionarioNaoEncontradoException;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.gerente.SenhaInvalidaException;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.usuario.*;
@@ -106,5 +110,27 @@ public class Handler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(respostaErro.getStatus()).body(respostaErro);
     }
 
+    @ExceptionHandler(ProdutoDuplicadoException.class)
+    public ResponseEntity<RespostaErro> produtoDuplicadoHandler(ProdutoDuplicadoException e) {
+        RespostaErro respostaErro = new RespostaErro(HttpStatus.CONFLICT, e.getMessage());
+        return ResponseEntity.status(respostaErro.getStatus()).body(respostaErro);
+    }
 
+    @ExceptionHandler(ProdutoNaoEncontradoException.class)
+    public ResponseEntity<RespostaErro> produtoNaoEncontradoHandler(ProdutoNaoEncontradoException e) {
+        RespostaErro respostaErro = new RespostaErro(HttpStatus.NOT_FOUND, e.getMessage());
+        return ResponseEntity.status(respostaErro.getStatus()).body(respostaErro);
+    }
+
+    @ExceptionHandler(EstoqueInvalidoException.class)
+    public ResponseEntity<RespostaErro> estoqueInvalidoHandler(EstoqueInvalidoException e) {
+        RespostaErro respostaErro = new RespostaErro(HttpStatus.BAD_REQUEST, e.getMessage());
+        return ResponseEntity.status(respostaErro.getStatus()).body(respostaErro);
+    }
+
+    @ExceptionHandler(PrecoInvalidoException.class)
+    public ResponseEntity<RespostaErro> precoInvalidoHandler(PrecoInvalidoException e) {
+        RespostaErro respostaErro = new RespostaErro(HttpStatus.BAD_REQUEST, e.getMessage());
+        return ResponseEntity.status(respostaErro.getStatus()).body(respostaErro);
+    }
 }
