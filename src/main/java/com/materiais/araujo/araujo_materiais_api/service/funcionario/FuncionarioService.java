@@ -6,10 +6,12 @@ import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.produto.EstoqueInvalidoException;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.produto.PrecoInvalidoException;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.produto.ProdutoDuplicadoException;
+import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.produto.ProdutoNaoEncontradoException;
 import com.materiais.araujo.araujo_materiais_api.model.produto.Produto;
 import com.materiais.araujo.araujo_materiais_api.model.usuario.Usuario;
 import com.materiais.araujo.araujo_materiais_api.repository.produto.ProdutoRepository;
 import com.materiais.araujo.araujo_materiais_api.service.usuario.UtilUsuario;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +27,7 @@ public class FuncionarioService {
         this.utilUsuario = utilUsuario;
     }
 
-    public void addProduto(ProdutoDTO dto) {
+    public ResponseEntity<ProdutoDTO> cadastrarProduto(ProdutoDTO dto) {
         if (produtoRepository.existsByCodigo(dto.codigo())) {
             throw new ProdutoDuplicadoException("Já existe um produto com o código " + dto.codigo());
         }
@@ -56,36 +58,11 @@ public class FuncionarioService {
         );
 
         produtoRepository.save(produto);
+
+        return ResponseEntity.ok().body(dto);
     }
 
-    public ProdutoDTO getProdutoPorNome(String nome) {
-        Produto produto = (Produto) produtoRepository.findByNome(nome).orElseThrow(() -> new RuntimeException());
-
-        return new ProdutoDTO(
-                produto.getNome(),
-                produto.getCodigo(),
-                produto.getPreco(),
-                produto.getQuantidade(),
-                produto.getEstoqueMinimo(),
-                produto.getTipo()
-        );
-    }
-
-    public void deletarProduto(SenhaDTO senhaFuncionario, Integer idProduto, ProdutoDTO dto) {
-        Usuario funcionario = utilUsuario.obterUsuarioDaVez();
-
-        if (!passwordEncoder.matches(senhaFuncionario.senha(), funcionario.getSenha())) {
-            throw new SenhaInvalidaException();
-        }
-
-        Produto produto = produtoRepository.findById(idProduto).orElseThrow(() -> new RuntimeException());
-
-        produtoRepository.delete(produto);
-    }
-
-
-
-    public ProdutoDTO atualizarProduto(SenhaDTO senhaFuncionario, Integer idProduto, ProdutoDTO dto) {
+    public ProdutoDTO editarProduto(SenhaDTO senhaFuncionario, Integer idProduto, ProdutoDTO dto) {
         Usuario funcionario = utilUsuario.obterUsuarioDaVez();
 
         if (!passwordEncoder.matches(senhaFuncionario.senha(), funcionario.getSenha())) {
@@ -93,7 +70,7 @@ public class FuncionarioService {
         }
 
         Produto produto = produtoRepository.findById(idProduto)
-                .orElseThrow(() -> new RuntimeException());
+                .orElseThrow(() -> new ProdutoNaoEncontradoException("Produto não encontrado"));
 
         produto.setNome(dto.nome());
         produto.setCodigo(dto.codigo());
@@ -113,5 +90,33 @@ public class FuncionarioService {
                 produtoAtualizado.getTipo()
         );
     }
+    public ResponseEntity<ProdutoDTO> consultarProdutoPorNome(String nome) {
+        Produto produto = (Produto) produtoRepository.findByNome(nome)
+                .orElseThrow(() -> new ProdutoNaoEncontradoException("Produto não encontrado"));
+
+        ProdutoDTO dto = new ProdutoDTO(
+                produto.getNome(),
+                produto.getCodigo(),
+                produto.getPreco(),
+                produto.getQuantidade(),
+                produto.getEstoqueMinimo(),
+                produto.getTipo()
+        );
+
+        return ResponseEntity.ok().body(dto);
+    }
+
+    public void deletarProduto(SenhaDTO senhaFuncionario, Integer idProduto, ProdutoDTO dto) {
+        Usuario funcionario = utilUsuario.obterUsuarioDaVez();
+
+        if (!passwordEncoder.matches(senhaFuncionario.senha(), funcionario.getSenha())) {
+            throw new SenhaInvalidaException();
+        }
+
+        Produto produto = produtoRepository.findById(idProduto).orElseThrow(() -> new RuntimeException());
+
+        produtoRepository.delete(produto);
+    }
+
 
 }
