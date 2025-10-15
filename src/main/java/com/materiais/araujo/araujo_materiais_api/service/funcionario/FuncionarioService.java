@@ -1,6 +1,8 @@
 package com.materiais.araujo.araujo_materiais_api.service.funcionario;
 
+import com.materiais.araujo.araujo_materiais_api.DTO.funcionario.DividaDTO;
 import com.materiais.araujo.araujo_materiais_api.DTO.gerente.SenhaDTO;
+import com.materiais.araujo.araujo_materiais_api.DTO.produto.EstoqueStatusDTO;
 import com.materiais.araujo.araujo_materiais_api.DTO.produto.ProdutoDTO;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.gerente.SenhaInvalidaException;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.produto.EstoqueInvalidoException;
@@ -14,6 +16,10 @@ import com.materiais.araujo.araujo_materiais_api.service.usuario.UtilUsuario;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class FuncionarioService {
@@ -118,5 +124,22 @@ public class FuncionarioService {
         produtoRepository.delete(produto);
     }
 
+    public ResponseEntity<EstoqueStatusDTO> verificarEstoqueBaixo(String nome) {
+        Produto produto = (Produto) produtoRepository.findByNome(nome)
+                .orElseThrow(() -> new ProdutoNaoEncontradoException("Produto não encontrado"));
+
+        String statusEstoque = produto.getQuantidade() < produto.getEstoqueMinimo()
+                ? "baixo"
+                : "normal";
+
+        EstoqueStatusDTO resposta = new EstoqueStatusDTO(
+                produto.getNome(),
+                produto.getQuantidade(),
+                produto.getEstoqueMinimo(),
+                statusEstoque
+        );
+
+        return ResponseEntity.ok(resposta);
+    }
 
 }
