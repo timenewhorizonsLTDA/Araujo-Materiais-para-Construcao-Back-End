@@ -1,5 +1,6 @@
 package com.materiais.araujo.araujo_materiais_api.infra.exceptions.handler;
 
+import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.cliente.ClienteNaoEncontradoException;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.gerente.DadosRepitidosEception;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.gerente.FuncionarioJaExistenteException;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.produto.EstoqueInvalidoException;
@@ -130,6 +131,12 @@ public class Handler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(PrecoInvalidoException.class)
     public ResponseEntity<RespostaErro> precoInvalidoHandler(PrecoInvalidoException e) {
+        RespostaErro respostaErro = new RespostaErro(HttpStatus.BAD_REQUEST, e.getMessage());
+        return ResponseEntity.status(respostaErro.getStatus()).body(respostaErro);
+    }
+
+    @ExceptionHandler(ClienteNaoEncontradoException.class)
+    public ResponseEntity<RespostaErro> ClienteNaoEncontradoHandler(ClienteNaoEncontradoException e) {
         RespostaErro respostaErro = new RespostaErro(HttpStatus.BAD_REQUEST, e.getMessage());
         return ResponseEntity.status(respostaErro.getStatus()).body(respostaErro);
     }

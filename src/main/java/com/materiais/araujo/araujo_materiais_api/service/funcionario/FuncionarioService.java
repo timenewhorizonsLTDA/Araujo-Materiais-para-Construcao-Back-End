@@ -1,36 +1,46 @@
 package com.materiais.araujo.araujo_materiais_api.service.funcionario;
 
-import com.materiais.araujo.araujo_materiais_api.DTO.funcionario.DividaDTO;
+import com.materiais.araujo.araujo_materiais_api.DTO.funcionario.OrcamentoDTO;
+import com.materiais.araujo.araujo_materiais_api.DTO.funcionario.OrcamentoResponseDTO;
 import com.materiais.araujo.araujo_materiais_api.DTO.gerente.SenhaDTO;
 import com.materiais.araujo.araujo_materiais_api.DTO.produto.EstoqueStatusDTO;
 import com.materiais.araujo.araujo_materiais_api.DTO.produto.ProdutoDTO;
+import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.cliente.ClienteNaoEncontradoException;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.gerente.SenhaInvalidaException;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.produto.EstoqueInvalidoException;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.produto.PrecoInvalidoException;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.produto.ProdutoDuplicadoException;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.produto.ProdutoNaoEncontradoException;
+import com.materiais.araujo.araujo_materiais_api.model.orcamento.Orcamento;
 import com.materiais.araujo.araujo_materiais_api.model.produto.Produto;
+import com.materiais.araujo.araujo_materiais_api.model.usuario.RoleUsuario;
 import com.materiais.araujo.araujo_materiais_api.model.usuario.Usuario;
+import com.materiais.araujo.araujo_materiais_api.repository.orcamento.OrcamentoRepository;
 import com.materiais.araujo.araujo_materiais_api.repository.produto.ProdutoRepository;
+import com.materiais.araujo.araujo_materiais_api.repository.usuario.UsuarioRepository;
 import com.materiais.araujo.araujo_materiais_api.service.usuario.UtilUsuario;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class FuncionarioService {
     private ProdutoRepository produtoRepository;
+    private UsuarioRepository usuarioRepository;
     private PasswordEncoder passwordEncoder;
     private UtilUsuario utilUsuario;
+    private OrcamentoRepository orcamentoRepository;
 
-    public FuncionarioService(ProdutoRepository produtoRepository, PasswordEncoder passwordEncoder, UtilUsuario utilUsuario) {
+    public FuncionarioService(ProdutoRepository produtoRepository, PasswordEncoder passwordEncoder, UtilUsuario utilUsuario,
+                              UsuarioRepository usuarioRepository, OrcamentoRepository orcamentoRepository) {
         this.produtoRepository = produtoRepository;
         this.passwordEncoder = passwordEncoder;
         this.utilUsuario = utilUsuario;
+        this.usuarioRepository = usuarioRepository;
+        this.orcamentoRepository = orcamentoRepository;
     }
 
     public ResponseEntity<ProdutoDTO> cadastrarProduto(ProdutoDTO dto) {
@@ -141,5 +151,39 @@ public class FuncionarioService {
 
         return ResponseEntity.ok(resposta);
     }
+    public ResponseEntity<OrcamentoResponseDTO> fazerOrcamento(OrcamentoDTO dto) {
 
+        Usuario cliente = usuarioRepository.findByCpf(dto.cpfCliente())
+                .filter(u -> u.getRole() == RoleUsuario.CLIENTE)
+                .orElseThrow(() -> new ClienteNaoEncontradoException("Cliente não encontrado com CPF: " + dto.cpfCliente()));
+
+        List<Produto> produtos = produtoRepository.findAllById(dto.idsProdutos());
+        if (produtos.isEmpty()) {
+            throw new ProdutoNaoEncontradoException("Nenhum produto encontrado para os IDs informados.");
+        }
+
+        Double valorFinal = produtos.stream()
+                .mapToDouble(Produto::getPreco)
+                .sum();
+
+        Orcamento orcamento = new Orcamento(
+                cliente,
+                produtos,
+                LocalDateTime.now(),
+                valorFinal,
+                dto.statusOrcamento()
+        );
+
+        return ResponseEntity.ok(
+                new OrcamentoResponseDTO(
+                        orcamento.getId(),
+                        cliente.getNome(),
+                        produtos.stream().map(Produto::getNome).toList(),
+                        valorFinal,
+                        orcamento.getDataEmissao(),
+                        orcamento.getStatusOrcamento()
+                )
+        );
+    }
+    
 }
