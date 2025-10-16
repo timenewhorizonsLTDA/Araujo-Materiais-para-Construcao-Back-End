@@ -157,7 +157,11 @@ public class FuncionarioService {
                 .filter(u -> u.getRole() == RoleUsuario.CLIENTE)
                 .orElseThrow(() -> new ClienteNaoEncontradoException("Cliente não encontrado com CPF: " + dto.cpfCliente()));
 
-        List<Produto> produtos = produtoRepository.findAllById(dto.idsProdutos());
+        List<Produto> produtos = dto.nomesProdutos().stream()
+                .map(nome -> (Produto) produtoRepository.findByNome(nome)
+                        .orElseThrow(() -> new ProdutoNaoEncontradoException("Produto não encontrado" + nome)))
+                .toList();
+
         if (produtos.isEmpty()) {
             throw new ProdutoNaoEncontradoException("Nenhum produto encontrado para os IDs informados.");
         }
@@ -185,5 +189,4 @@ public class FuncionarioService {
                 )
         );
     }
-    
 }
