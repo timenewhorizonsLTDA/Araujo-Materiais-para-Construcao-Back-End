@@ -77,7 +77,7 @@ public class AutenticacaoService {
 
     public ResponseEntity<String> reenviarCodigo(Integer usuarioID) {
 
-        CodigoAutorizacao codigoAutorizacao = codigoAutorizacaoRepository.findById(usuarioID).orElseThrow(() -> new UsuarioNaoRealizouCadastroException());
+        CodigoAutorizacao codigoAutorizacao = codigoAutorizacaoRepository.findByUsuarioId(usuarioID).orElseThrow(() -> new UsuarioNaoRealizouCadastroException());
 
         Usuario usuario = codigoAutorizacao.getUsuario();
 
