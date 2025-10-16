@@ -1,6 +1,7 @@
 package com.materiais.araujo.araujo_materiais_api.repository.usuario;
 
 import com.materiais.araujo.araujo_materiais_api.model.usuario.CodigoAutorizacao;
+import com.materiais.araujo.araujo_materiais_api.model.usuario.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -10,4 +11,5 @@ import java.util.Optional;
 public interface CodigoAutorizacaoRepository extends JpaRepository<CodigoAutorizacao, Integer> {
 
     Optional<CodigoAutorizacao> findByCodigo(String codigo);
+    Optional<CodigoAutorizacao> findByUsuarioId(Integer id);
 }
