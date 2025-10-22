@@ -1,5 +1,8 @@
 package com.materiais.araujo.araujo_materiais_api.service.funcionario;
 
+import com.materiais.araujo.araujo_materiais_api.DTO.agendamento.SolicitacaoProdutoAtualizacaoDTO;
+import com.materiais.araujo.araujo_materiais_api.DTO.agendamento.SolicitacaoProdutoDTO;
+import com.materiais.araujo.araujo_materiais_api.DTO.agendamento.SolicitacaoProdutoResponseDTO;
 import com.materiais.araujo.araujo_materiais_api.DTO.funcionario.OrcamentoDTO;
 import com.materiais.araujo.araujo_materiais_api.DTO.funcionario.OrcamentoResponseDTO;
 import com.materiais.araujo.araujo_materiais_api.DTO.gerente.SenhaDTO;
@@ -13,18 +16,24 @@ import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.produto.ProdutoNaoEncontradoException;
 import com.materiais.araujo.araujo_materiais_api.model.orcamento.Orcamento;
 import com.materiais.araujo.araujo_materiais_api.model.produto.Produto;
+import com.materiais.araujo.araujo_materiais_api.model.solicitacaoproduto.SolicitacaoProduto;
+import com.materiais.araujo.araujo_materiais_api.model.solicitacaoproduto.StatusSolicitacao;
 import com.materiais.araujo.araujo_materiais_api.model.usuario.RoleUsuario;
 import com.materiais.araujo.araujo_materiais_api.model.usuario.Usuario;
 import com.materiais.araujo.araujo_materiais_api.repository.orcamento.OrcamentoRepository;
 import com.materiais.araujo.araujo_materiais_api.repository.produto.ProdutoRepository;
+import com.materiais.araujo.araujo_materiais_api.repository.solicitacaoproduto.SolicitacaoProdutoRepository;
 import com.materiais.araujo.araujo_materiais_api.repository.usuario.UsuarioRepository;
 import com.materiais.araujo.araujo_materiais_api.service.usuario.UtilUsuario;
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class FuncionarioService {
@@ -33,14 +42,16 @@ public class FuncionarioService {
     private PasswordEncoder passwordEncoder;
     private UtilUsuario utilUsuario;
     private OrcamentoRepository orcamentoRepository;
+    private SolicitacaoProdutoRepository solicitacaoProdutoRepository;
 
     public FuncionarioService(ProdutoRepository produtoRepository, PasswordEncoder passwordEncoder, UtilUsuario utilUsuario,
-                              UsuarioRepository usuarioRepository, OrcamentoRepository orcamentoRepository) {
+                              UsuarioRepository usuarioRepository, OrcamentoRepository orcamentoRepository, SolicitacaoProdutoRepository solicitacaoProdutoRepository) {
         this.produtoRepository = produtoRepository;
         this.passwordEncoder = passwordEncoder;
         this.utilUsuario = utilUsuario;
         this.usuarioRepository = usuarioRepository;
         this.orcamentoRepository = orcamentoRepository;
+        this.solicitacaoProdutoRepository = solicitacaoProdutoRepository;
     }
 
     public ResponseEntity<ProdutoDTO> cadastrarProduto(ProdutoDTO dto) {
@@ -189,4 +200,91 @@ public class FuncionarioService {
                 )
         );
     }
+
+    public ResponseEntity<SolicitacaoProduto> adicionarAgendamento(SolicitacaoProdutoDTO dto) {
+        Usuario cliente = usuarioRepository.findById(dto.clienteId())
+                .orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado com ID: "));
+
+        Orcamento orcamento = orcamentoRepository.findById(dto.orcamentoId())
+                .orElseThrow(() -> new EntityNotFoundException("Orçamento não encontrado com ID: "));
+
+
+        SolicitacaoProduto solicitacao = new SolicitacaoProduto();
+        solicitacao.setCliente(cliente);
+        solicitacao.setOrcamento(orcamento);
+        solicitacao.setDataHoraSolicitou(LocalDateTime.now());
+        solicitacao.setDataHoraEntregue(dto.dataHoraEntregue());
+        solicitacao.setEndereco(dto.endereco());
+        solicitacao.setStatusSolicitacao(dto.statusSolicitacao() != null
+                ? dto.statusSolicitacao()
+                : StatusSolicitacao.PENDENTE);
+
+
+        SolicitacaoProduto salvo = solicitacaoProdutoRepository.save(solicitacao);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
+    }
+
+    public ResponseEntity<List<SolicitacaoProdutoResponseDTO>> verificarAgendamentos(
+            Optional<StatusSolicitacao> status,
+            Optional<Integer> clienteId) {
+
+        List<SolicitacaoProduto> solicitacoes;
+
+        if (status.isPresent() && clienteId.isPresent()) {
+            solicitacoes = solicitacaoProdutoRepository.findByStatusSolicitacaoAndClienteId(status.get(), clienteId.get());
+        } else if (status.isPresent()) {
+            solicitacoes = solicitacaoProdutoRepository.findByStatusSolicitacao(status.get());
+        } else if (clienteId.isPresent()) {
+            solicitacoes = solicitacaoProdutoRepository.findByClienteId(clienteId.get());
+        } else {
+            solicitacoes = solicitacaoProdutoRepository.findAll();
+        }
+
+        // Conversão direta para DTO
+        List<SolicitacaoProdutoResponseDTO> dtos = solicitacoes.stream()
+                .map(s -> new SolicitacaoProdutoResponseDTO(
+                        s.getId(),
+                        s.getCliente().getNome(),
+                        s.getDataHoraSolicitou(),
+                        s.getDataHoraEntregue(),
+                        s.getEndereco(),
+                        s.getStatusSolicitacao()
+                ))
+                .toList();
+
+        if (dtos.isEmpty()) {
+            return ResponseEntity.noContent().build(); // HTTP 204
+        }
+
+        return ResponseEntity.ok(dtos); // HTTP 200
+    }
+
+    public ResponseEntity<SolicitacaoProdutoResponseDTO> atualizarAgendamentos(
+            Integer id,
+            SolicitacaoProdutoAtualizacaoDTO dto) {
+
+        SolicitacaoProduto existente = solicitacaoProdutoRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Agendamento não encontrado com o ID: " + id));
+
+        existente.setDataHoraEntregue(dto.dataHoraEntregue());
+        existente.setEndereco(dto.endereco());
+        existente.setStatusSolicitacao(dto.statusSolicitacao());
+
+        SolicitacaoProduto atualizado = solicitacaoProdutoRepository.save(existente);
+
+        SolicitacaoProdutoResponseDTO responseDTO = new SolicitacaoProdutoResponseDTO(
+                atualizado.getId(),
+                atualizado.getCliente().getNome(),
+                atualizado.getDataHoraSolicitou(),
+                atualizado.getDataHoraEntregue(),
+                atualizado.getEndereco(),
+                atualizado.getStatusSolicitacao()
+        );
+
+        return ResponseEntity.ok(responseDTO);
+    }
 }
+
+
