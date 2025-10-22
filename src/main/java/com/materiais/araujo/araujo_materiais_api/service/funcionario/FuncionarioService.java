@@ -3,6 +3,7 @@ package com.materiais.araujo.araujo_materiais_api.service.funcionario;
 import com.materiais.araujo.araujo_materiais_api.DTO.agendamento.SolicitacaoProdutoAtualizacaoDTO;
 import com.materiais.araujo.araujo_materiais_api.DTO.agendamento.SolicitacaoProdutoDTO;
 import com.materiais.araujo.araujo_materiais_api.DTO.agendamento.SolicitacaoProdutoResponseDTO;
+import com.materiais.araujo.araujo_materiais_api.DTO.divida.DividaResponseDTO;
 import com.materiais.araujo.araujo_materiais_api.DTO.funcionario.OrcamentoDTO;
 import com.materiais.araujo.araujo_materiais_api.DTO.funcionario.OrcamentoResponseDTO;
 import com.materiais.araujo.araujo_materiais_api.DTO.gerente.SenhaDTO;
@@ -14,12 +15,15 @@ import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.produto.PrecoInvalidoException;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.produto.ProdutoDuplicadoException;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.produto.ProdutoNaoEncontradoException;
+import com.materiais.araujo.araujo_materiais_api.model.divida.Divida;
+import com.materiais.araujo.araujo_materiais_api.model.divida.StatusDivida;
 import com.materiais.araujo.araujo_materiais_api.model.orcamento.Orcamento;
 import com.materiais.araujo.araujo_materiais_api.model.produto.Produto;
 import com.materiais.araujo.araujo_materiais_api.model.solicitacaoproduto.SolicitacaoProduto;
 import com.materiais.araujo.araujo_materiais_api.model.solicitacaoproduto.StatusSolicitacao;
 import com.materiais.araujo.araujo_materiais_api.model.usuario.RoleUsuario;
 import com.materiais.araujo.araujo_materiais_api.model.usuario.Usuario;
+import com.materiais.araujo.araujo_materiais_api.repository.divida.DividaRepository;
 import com.materiais.araujo.araujo_materiais_api.repository.orcamento.OrcamentoRepository;
 import com.materiais.araujo.araujo_materiais_api.repository.produto.ProdutoRepository;
 import com.materiais.araujo.araujo_materiais_api.repository.solicitacaoproduto.SolicitacaoProdutoRepository;
@@ -43,15 +47,17 @@ public class FuncionarioService {
     private UtilUsuario utilUsuario;
     private OrcamentoRepository orcamentoRepository;
     private SolicitacaoProdutoRepository solicitacaoProdutoRepository;
+    private DividaRepository dividaRepository;
 
     public FuncionarioService(ProdutoRepository produtoRepository, PasswordEncoder passwordEncoder, UtilUsuario utilUsuario,
-                              UsuarioRepository usuarioRepository, OrcamentoRepository orcamentoRepository, SolicitacaoProdutoRepository solicitacaoProdutoRepository) {
+                              UsuarioRepository usuarioRepository, OrcamentoRepository orcamentoRepository, SolicitacaoProdutoRepository solicitacaoProdutoRepository, DividaRepository dividaRepository) {
         this.produtoRepository = produtoRepository;
         this.passwordEncoder = passwordEncoder;
         this.utilUsuario = utilUsuario;
         this.usuarioRepository = usuarioRepository;
         this.orcamentoRepository = orcamentoRepository;
         this.solicitacaoProdutoRepository = solicitacaoProdutoRepository;
+        this.dividaRepository = dividaRepository;
     }
 
     public ResponseEntity<ProdutoDTO> cadastrarProduto(ProdutoDTO dto) {
@@ -241,7 +247,6 @@ public class FuncionarioService {
             solicitacoes = solicitacaoProdutoRepository.findAll();
         }
 
-        // Conversão direta para DTO
         List<SolicitacaoProdutoResponseDTO> dtos = solicitacoes.stream()
                 .map(s -> new SolicitacaoProdutoResponseDTO(
                         s.getId(),
@@ -254,10 +259,10 @@ public class FuncionarioService {
                 .toList();
 
         if (dtos.isEmpty()) {
-            return ResponseEntity.noContent().build(); // HTTP 204
+            return ResponseEntity.noContent().build();
         }
 
-        return ResponseEntity.ok(dtos); // HTTP 200
+        return ResponseEntity.ok(dtos);
     }
 
     public ResponseEntity<SolicitacaoProdutoResponseDTO> atualizarAgendamentos(
@@ -284,6 +289,31 @@ public class FuncionarioService {
         );
 
         return ResponseEntity.ok(responseDTO);
+    }
+
+    public ResponseEntity<DividaResponseDTO> registrarDividaCliente(Integer orcamentoId) {
+        Orcamento orcamento = orcamentoRepository.findById(orcamentoId)
+                .orElseThrow(() -> new EntityNotFoundException("Orçamento não encontrado com ID: " + orcamentoId));
+
+        Divida novaDivida = new Divida(
+                orcamento.getCliente(),
+                orcamento,
+                orcamento.getValorFinal(),
+                LocalDateTime.now().plusDays(30),
+                StatusDivida.PENDENTE
+        );
+
+        dividaRepository.save(novaDivida);
+
+        DividaResponseDTO responseDTO = new DividaResponseDTO(
+                novaDivida.getId(),
+                novaDivida.getCliente().getNome(),
+                novaDivida.getValor(),
+                novaDivida.getDataVencimento(),
+                novaDivida.getStatusDivida().toString()
+        );
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
 }
 
