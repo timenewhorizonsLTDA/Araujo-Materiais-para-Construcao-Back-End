@@ -96,7 +96,7 @@ public class FuncionarioService {
         return ResponseEntity.ok().body(dto);
     }
 
-    public ProdutoDTO editarProduto(SenhaDTO senhaFuncionario, Integer idProduto, ProdutoDTO dto) {
+    public ResponseEntity<ProdutoDTO> editarProduto(SenhaDTO senhaFuncionario, Integer idProduto, ProdutoDTO dto) {
         Usuario funcionario = utilUsuario.obterUsuarioDaVez();
 
         if (!passwordEncoder.matches(senhaFuncionario.senha(), funcionario.getSenha())) {
@@ -115,7 +115,7 @@ public class FuncionarioService {
 
         Produto produtoAtualizado = produtoRepository.save(produto);
 
-        return new ProdutoDTO(
+        ProdutoDTO responseDTO = new ProdutoDTO(
                 produtoAtualizado.getNome(),
                 produtoAtualizado.getCodigo(),
                 produtoAtualizado.getPreco(),
@@ -123,7 +123,10 @@ public class FuncionarioService {
                 produtoAtualizado.getEstoqueMinimo(),
                 produtoAtualizado.getTipo()
         );
+
+        return ResponseEntity.ok(responseDTO);
     }
+
     public ResponseEntity<ProdutoDTO> consultarProdutoPorNome(String nome) {
         Produto produto = (Produto) produtoRepository.findByNome(nome)
                 .orElseThrow(() -> new ProdutoNaoEncontradoException("Produto não encontrado"));
@@ -140,7 +143,7 @@ public class FuncionarioService {
         return ResponseEntity.ok().body(dto);
     }
 
-    public void deletarProduto(SenhaDTO senhaFuncionario, Integer idProduto, ProdutoDTO dto) {
+    public void deletarProduto(SenhaDTO senhaFuncionario, Integer idProduto) {
         Usuario funcionario = utilUsuario.obterUsuarioDaVez();
 
         if (!passwordEncoder.matches(senhaFuncionario.senha(), funcionario.getSenha())) {
@@ -169,6 +172,7 @@ public class FuncionarioService {
 
         return ResponseEntity.ok(resposta);
     }
+
     public ResponseEntity<OrcamentoResponseDTO> fazerOrcamento(OrcamentoDTO dto) {
 
         Usuario cliente = usuarioRepository.findByCpf(dto.cpfCliente())

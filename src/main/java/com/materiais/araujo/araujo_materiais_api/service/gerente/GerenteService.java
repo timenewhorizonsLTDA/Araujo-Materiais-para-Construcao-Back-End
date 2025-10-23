@@ -62,7 +62,6 @@ public class GerenteService {
 
     }
 
-
     public ResponseEntity<EditarFuncionarioResponseDTO> editarFuncionario(Integer idFuncionario, EditarFuncionarioDTO dto) {
 
         Usuario funcionario = usuarioRepository.findById(idFuncionario).orElseThrow(() -> new FuncionarioNaoEncontradoException());
