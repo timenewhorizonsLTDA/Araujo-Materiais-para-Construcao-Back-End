@@ -346,9 +346,19 @@ public class FuncionarioService {
         return ResponseEntity.ok(responseDTOs);
     }
 
-    public ResponseEntity<DividaResponseDTO> atualizarDividaCliente(Integer id, DividaDTOAtualizacao dto) {
-        Divida dividaExistente = dividaRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Dívida não encontrada com o ID: " + id));
+    public ResponseEntity<DividaResponseDTO> atualizarDividaCliente(
+            SenhaDTO senhaFuncionario,
+            Integer idDivida,
+            DividaDTOAtualizacao dto) {
+
+        Usuario funcionario = utilUsuario.obterUsuarioDaVez();
+
+        if (!passwordEncoder.matches(senhaFuncionario.senha(), funcionario.getSenha())) {
+            throw new SenhaInvalidaException();
+        }
+
+        Divida dividaExistente = dividaRepository.findById(idDivida)
+                .orElseThrow(() -> new EntityNotFoundException("Dívida não encontrada com o ID: " + idDivida));
 
         if (dto.valor() != null) {
             dividaExistente.setValor(dto.valor());
@@ -373,5 +383,3 @@ public class FuncionarioService {
         return ResponseEntity.ok(responseDTO);
     }
 }
-
-
