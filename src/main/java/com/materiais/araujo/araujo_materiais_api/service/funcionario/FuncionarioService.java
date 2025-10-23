@@ -3,6 +3,7 @@ package com.materiais.araujo.araujo_materiais_api.service.funcionario;
 import com.materiais.araujo.araujo_materiais_api.DTO.agendamento.SolicitacaoProdutoAtualizacaoDTO;
 import com.materiais.araujo.araujo_materiais_api.DTO.agendamento.SolicitacaoProdutoDTO;
 import com.materiais.araujo.araujo_materiais_api.DTO.agendamento.SolicitacaoProdutoResponseDTO;
+import com.materiais.araujo.araujo_materiais_api.DTO.divida.DividaDTOAtualizacao;
 import com.materiais.araujo.araujo_materiais_api.DTO.divida.DividaResponseDTO;
 import com.materiais.araujo.araujo_materiais_api.DTO.funcionario.OrcamentoDTO;
 import com.materiais.araujo.araujo_materiais_api.DTO.funcionario.OrcamentoResponseDTO;
@@ -314,6 +315,62 @@ public class FuncionarioService {
         );
 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
+    }
+
+    public ResponseEntity<List<DividaResponseDTO>> verificarDividasCliente(
+            Optional<StatusDivida> status,
+            Optional<Integer> clienteId) {
+
+        List<Divida> dividas;
+
+        if (status.isPresent() && clienteId.isPresent()) {
+            dividas = dividaRepository.findByStatusDividaAndClienteId(status.get(), clienteId.get());
+        } else if (status.isPresent()) {
+            dividas = dividaRepository.findByStatusDivida(status.get());
+        } else if (clienteId.isPresent()) {
+            dividas = dividaRepository.findByClienteId(clienteId.get());
+        } else {
+            dividas = dividaRepository.findAll();
+        }
+
+        List<DividaResponseDTO> responseDTOs = dividas.stream()
+                .map(divida -> new DividaResponseDTO(
+                        divida.getId(),
+                        divida.getCliente().getNome(),
+                        divida.getValor(),
+                        divida.getDataVencimento(),
+                        divida.getStatusDivida().toString()
+                ))
+                .toList();
+
+        return ResponseEntity.ok(responseDTOs);
+    }
+
+    public ResponseEntity<DividaResponseDTO> atualizarDividaCliente(Integer id, DividaDTOAtualizacao dto) {
+        Divida dividaExistente = dividaRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Dívida não encontrada com o ID: " + id));
+
+        if (dto.valor() != null) {
+            dividaExistente.setValor(dto.valor());
+        }
+        if (dto.dataVencimento() != null) {
+            dividaExistente.setDataVencimento(dto.dataVencimento());
+        }
+        if (dto.statusDivida() != null) {
+            dividaExistente.setStatusDivida(dto.statusDivida());
+        }
+
+        Divida atualizada = dividaRepository.save(dividaExistente);
+
+        DividaResponseDTO responseDTO = new DividaResponseDTO(
+                atualizada.getId(),
+                atualizada.getCliente().getNome(),
+                atualizada.getValor(),
+                atualizada.getDataVencimento(),
+                atualizada.getStatusDivida().toString()
+        );
+
+        return ResponseEntity.ok(responseDTO);
     }
 }
 
