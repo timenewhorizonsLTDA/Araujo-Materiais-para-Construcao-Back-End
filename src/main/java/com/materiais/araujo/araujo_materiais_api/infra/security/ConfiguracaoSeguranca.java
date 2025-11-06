@@ -31,6 +31,7 @@ public class ConfiguracaoSeguranca {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(a -> a
                         .requestMatchers("/gerente/**").hasRole("GERENTE")
+                        .requestMatchers("/funcionario/**").hasRole("FUNCIONARIO")
                         .anyRequest().permitAll())
                 .addFilterBefore(filtroSeguranca, UsernamePasswordAuthenticationFilter.class)
                 .build();

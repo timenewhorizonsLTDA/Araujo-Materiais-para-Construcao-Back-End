@@ -10,6 +10,7 @@ import com.materiais.araujo.araujo_materiais_api.DTO.funcionario.OrcamentoRespon
 import com.materiais.araujo.araujo_materiais_api.DTO.gerente.SenhaDTO;
 import com.materiais.araujo.araujo_materiais_api.DTO.produto.EstoqueStatusDTO;
 import com.materiais.araujo.araujo_materiais_api.DTO.produto.ProdutoDTO;
+import com.materiais.araujo.araujo_materiais_api.DTO.produto.ProdutoEdicaoRequest;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.cliente.ClienteNaoEncontradoException;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.gerente.SenhaInvalidaException;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.produto.EstoqueInvalidoException;
@@ -96,10 +97,10 @@ public class FuncionarioService {
         return ResponseEntity.ok().body(dto);
     }
 
-    public ResponseEntity<ProdutoDTO> editarProduto(SenhaDTO senhaFuncionario, Integer idProduto, ProdutoDTO dto) {
+    public ResponseEntity<ProdutoDTO> editarProduto(Integer idProduto, ProdutoEdicaoRequest dto) {
         Usuario funcionario = utilUsuario.obterUsuarioDaVez();
 
-        if (!passwordEncoder.matches(senhaFuncionario.senha(), funcionario.getSenha())) {
+        if (!passwordEncoder.matches(dto.senha(), funcionario.getSenha())) {
             throw new SenhaInvalidaException();
         }
 
@@ -127,6 +128,7 @@ public class FuncionarioService {
         return ResponseEntity.ok(responseDTO);
     }
 
+
     public ResponseEntity<ProdutoDTO> consultarProdutoPorNome(String nome) {
         Produto produto = (Produto) produtoRepository.findByNome(nome)
                 .orElseThrow(() -> new ProdutoNaoEncontradoException("Produto não encontrado"));
@@ -143,10 +145,10 @@ public class FuncionarioService {
         return ResponseEntity.ok().body(dto);
     }
 
-    public void deletarProduto(SenhaDTO senhaFuncionario, Integer idProduto) {
+    public void deletarProduto(SenhaDTO senha, Integer idProduto) {
         Usuario funcionario = utilUsuario.obterUsuarioDaVez();
 
-        if (!passwordEncoder.matches(senhaFuncionario.senha(), funcionario.getSenha())) {
+        if (!passwordEncoder.matches(senha.senha(), funcionario.getSenha())) {
             throw new SenhaInvalidaException();
         }
 
@@ -180,12 +182,12 @@ public class FuncionarioService {
                 .orElseThrow(() -> new ClienteNaoEncontradoException("Cliente não encontrado com CPF: " + dto.cpfCliente()));
 
         List<Produto> produtos = dto.nomesProdutos().stream()
-                .map(nome -> (Produto) produtoRepository.findByNome(nome)
-                        .orElseThrow(() -> new ProdutoNaoEncontradoException("Produto não encontrado" + nome)))
+                .map(nome -> produtoRepository.findByNome(nome)
+                        .orElseThrow(() -> new ProdutoNaoEncontradoException("Produto não encontrado: " + nome)))
                 .toList();
 
         if (produtos.isEmpty()) {
-            throw new ProdutoNaoEncontradoException("Nenhum produto encontrado para os IDs informados.");
+            throw new ProdutoNaoEncontradoException("Nenhum produto encontrado para os nomes informados.");
         }
 
         Double valorFinal = produtos.stream()
@@ -200,17 +202,20 @@ public class FuncionarioService {
                 dto.statusOrcamento()
         );
 
+        Orcamento salvo = orcamentoRepository.save(orcamento);
+
         return ResponseEntity.ok(
                 new OrcamentoResponseDTO(
-                        orcamento.getId(),
+                        salvo.getId(),
                         cliente.getNome(),
                         produtos.stream().map(Produto::getNome).toList(),
                         valorFinal,
-                        orcamento.getDataEmissao(),
-                        orcamento.getStatusOrcamento()
+                        salvo.getDataEmissao(),
+                        salvo.getStatusOrcamento()
                 )
         );
     }
+
 
     public ResponseEntity<SolicitacaoProduto> adicionarAgendamento(SolicitacaoProdutoDTO dto) {
         Usuario cliente = usuarioRepository.findById(dto.clienteId())
@@ -351,13 +356,12 @@ public class FuncionarioService {
     }
 
     public ResponseEntity<DividaResponseDTO> atualizarDividaCliente(
-            SenhaDTO senhaFuncionario,
             Integer idDivida,
             DividaDTOAtualizacao dto) {
 
         Usuario funcionario = utilUsuario.obterUsuarioDaVez();
 
-        if (!passwordEncoder.matches(senhaFuncionario.senha(), funcionario.getSenha())) {
+        if (!passwordEncoder.matches(dto.senha(), funcionario.getSenha())) {
             throw new SenhaInvalidaException();
         }
 
