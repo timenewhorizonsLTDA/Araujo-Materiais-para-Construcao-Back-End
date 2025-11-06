@@ -3,10 +3,10 @@ package com.materiais.araujo.araujo_materiais_api.controller.usuario;
 import com.materiais.araujo.araujo_materiais_api.DTO.usuario.*;
 import com.materiais.araujo.araujo_materiais_api.service.usuario.AutenticacaoService;
 import jakarta.validation.Valid;
-import jakarta.websocket.server.PathParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("auth")
 public class AutenticacaoController {
