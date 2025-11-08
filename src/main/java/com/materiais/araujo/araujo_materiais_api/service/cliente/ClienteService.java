@@ -2,12 +2,18 @@ package com.materiais.araujo.araujo_materiais_api.service.cliente;
 
 import com.materiais.araujo.araujo_materiais_api.DTO.produto.ProdutoDTO;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.cliente.ClienteNaoEncontradoException;
+import com.materiais.araujo.araujo_materiais_api.model.orcamento.Orcamento;
 import com.materiais.araujo.araujo_materiais_api.model.usuario.RoleUsuario;
 import com.materiais.araujo.araujo_materiais_api.repository.orcamento.OrcamentoRepository;
 import com.materiais.araujo.araujo_materiais_api.repository.usuario.UsuarioRepository;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 public class ClienteService {
@@ -21,21 +27,12 @@ public class ClienteService {
         this.orcamentoRepository = orcamentoRepository;
     }
 
-    public List<ProdutoDTO> consultarProdutosCliente(String cpfCliente) {
-        var cliente = usuarioRepository.findByCpf(cpfCliente)
-                .filter(u -> u.getRole() == RoleUsuario.CLIENTE)
-                .orElseThrow(() ->
-                        new ClienteNaoEncontradoException("Cliente não encontrado com CPF: " + cpfCliente));
+    @Transactional
+    public ResponseEntity<List<ProdutoDTO>> consultarProdutosDoOrcamento(Integer orcamentoId) {
+        Orcamento orcamento = orcamentoRepository.findById(orcamentoId)
+                .orElseThrow(() -> new EntityNotFoundException("Orçamento não encontrado com ID: " + orcamentoId));
 
-        var orcamentos = orcamentoRepository.findByCliente(cliente);
-
-        if (orcamentos.isEmpty()) {
-            throw new RuntimeException("Nenhum produto encontrado para este cliente.");
-        }
-
-        return orcamentos.stream()
-                .flatMap(o -> o.getProdutos().stream())
-                .distinct()
+        List<ProdutoDTO> produtos = orcamento.getProdutos().stream()
                 .map(p -> new ProdutoDTO(
                         p.getNome(),
                         p.getCodigo(),
@@ -44,6 +41,9 @@ public class ClienteService {
                         p.getEstoqueMinimo(),
                         p.getTipo()
                 ))
-                .collect(Collectors.toList());
+                .collect(toList());
+
+        return ResponseEntity.ok(produtos);
     }
+
 }

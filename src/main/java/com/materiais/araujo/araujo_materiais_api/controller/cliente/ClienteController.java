@@ -17,10 +17,10 @@ public class ClienteController {
         this.clienteService = clienteService;
     }
 
-    @GetMapping("/produtos")
-    public ResponseEntity<List<ProdutoDTO>> consultarProdutosCliente(@RequestParam String cpf) {
-        List<ProdutoDTO> produtos = clienteService.consultarProdutosCliente(cpf);
-        return ResponseEntity.ok(produtos);
+    @GetMapping("/orcamento/{id}")
+    public ResponseEntity<List<ProdutoDTO>> consultarProdutosDoOrcamento(@PathVariable Integer id) {
+        return clienteService.consultarProdutosDoOrcamento(id);
     }
+
 }
 

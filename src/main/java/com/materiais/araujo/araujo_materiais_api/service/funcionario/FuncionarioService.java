@@ -38,6 +38,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -193,16 +194,23 @@ public class FuncionarioService {
         Double valorFinal = produtos.stream()
                 .mapToDouble(Produto::getPreco)
                 .sum();
-
+        
         Orcamento orcamento = new Orcamento(
                 cliente,
-                produtos,
+                new ArrayList<>(), // lista será preenchida depois
                 LocalDateTime.now(),
                 valorFinal,
                 dto.statusOrcamento()
         );
 
         Orcamento salvo = orcamentoRepository.save(orcamento);
+
+        produtos.forEach(p -> {
+            p.setOrcamento(salvo);
+            produtoRepository.save(p);
+        });
+
+        salvo.setProdutos(produtos);
 
         return ResponseEntity.ok(
                 new OrcamentoResponseDTO(
