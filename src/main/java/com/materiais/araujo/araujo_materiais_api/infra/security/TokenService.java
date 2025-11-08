@@ -28,15 +28,11 @@ public class TokenService {
 
             Algorithm algorithm = Algorithm.HMAC256(minhaSenha);
 
-//            List<String> roles = usuario.getAuthorities()
-//                    .stream()
-//                    .map(a -> a.getAuthority())
-//                    .collect(Collectors.toList());
 
             return JWT.create()
                     .withIssuer("araujo-construcao-api")
                     .withSubject(usuario.getEmail())
-                    .withClaim("roles",usuario.getRole().name())
+                    .withClaim("roles", usuario.getRole().name())
                     .withExpiresAt(tempoToken())
                     .sign(algorithm);
         } catch (RuntimeException e) {
