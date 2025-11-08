@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TokenService {
@@ -26,9 +28,15 @@ public class TokenService {
 
             Algorithm algorithm = Algorithm.HMAC256(minhaSenha);
 
+            List<String> roles = usuario.getAuthorities()
+                    .stream()
+                    .map(a -> a.getAuthority())
+                    .collect(Collectors.toList());
+
             return JWT.create()
                     .withIssuer("araujo-construcao-api")
                     .withSubject(usuario.getEmail())
+                    .withClaim("roles",roles)
                     .withExpiresAt(tempoToken())
                     .sign(algorithm);
         } catch (RuntimeException e) {
