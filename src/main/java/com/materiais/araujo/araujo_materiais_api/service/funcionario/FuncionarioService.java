@@ -227,7 +227,7 @@ public class FuncionarioService {
 
     public ResponseEntity<SolicitacaoProduto> adicionarAgendamento(SolicitacaoProdutoDTO dto) {
         Usuario cliente = usuarioRepository.findById(dto.clienteId())
-                .orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado com ID: "));
+                .orElseThrow(() ->new EntityNotFoundException("Cliente não encontrado com ID: "));
 
         Orcamento orcamento = orcamentoRepository.findById(dto.orcamentoId())
                 .orElseThrow(() -> new EntityNotFoundException("Orçamento não encontrado com ID: "));
