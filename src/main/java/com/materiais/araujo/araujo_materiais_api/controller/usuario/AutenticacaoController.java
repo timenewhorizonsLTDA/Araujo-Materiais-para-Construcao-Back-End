@@ -1,12 +1,23 @@
 package com.materiais.araujo.araujo_materiais_api.controller.usuario;
 
-import com.materiais.araujo.araujo_materiais_api.DTO.usuario.*;
-import com.materiais.araujo.araujo_materiais_api.service.usuario.AutenticacaoService;
-import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@CrossOrigin(origins = "*")
+import com.materiais.araujo.araujo_materiais_api.DTO.usuario.CadastroDTO;
+import com.materiais.araujo.araujo_materiais_api.DTO.usuario.CadastroResponseDTO;
+import com.materiais.araujo.araujo_materiais_api.DTO.usuario.CodigoValidacaoDTO;
+import com.materiais.araujo.araujo_materiais_api.DTO.usuario.LoginDTO;
+import com.materiais.araujo.araujo_materiais_api.DTO.usuario.RecuperarAcessoDTO;
+import com.materiais.araujo.araujo_materiais_api.DTO.usuario.TokenDTO;
+import com.materiais.araujo.araujo_materiais_api.service.usuario.AutenticacaoService;
+
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("auth")
 public class AutenticacaoController {

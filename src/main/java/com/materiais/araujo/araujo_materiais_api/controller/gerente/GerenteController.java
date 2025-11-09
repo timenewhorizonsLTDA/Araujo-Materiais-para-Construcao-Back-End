@@ -1,13 +1,26 @@
 package com.materiais.araujo.araujo_materiais_api.controller.gerente;
 
-import com.materiais.araujo.araujo_materiais_api.DTO.gerente.*;
-import com.materiais.araujo.araujo_materiais_api.service.gerente.GerenteService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
-@CrossOrigin(origins = "*")
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.materiais.araujo.araujo_materiais_api.DTO.gerente.BuscarFuncionarioDTO;
+import com.materiais.araujo.araujo_materiais_api.DTO.gerente.BuscarFuncionarioNomeDTO;
+import com.materiais.araujo.araujo_materiais_api.DTO.gerente.CadastrarFuncionarioDTO;
+import com.materiais.araujo.araujo_materiais_api.DTO.gerente.CadastrarFuncionarioResponseDTO;
+import com.materiais.araujo.araujo_materiais_api.DTO.gerente.EditarFuncionarioDTO;
+import com.materiais.araujo.araujo_materiais_api.DTO.gerente.EditarFuncionarioResponseDTO;
+import com.materiais.araujo.araujo_materiais_api.DTO.gerente.SenhaDTO;
+import com.materiais.araujo.araujo_materiais_api.service.gerente.GerenteService;
+
 @RestController
 @RequestMapping("gerente")
 public class GerenteController {

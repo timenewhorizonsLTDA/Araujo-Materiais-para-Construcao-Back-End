@@ -2,7 +2,6 @@ package com.materiais.araujo.araujo_materiais_api.infra.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,7 +16,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class ConfiguracaoSeguranca {
 
-    private FiltroSeguranca filtroSeguranca;
+    private final FiltroSeguranca filtroSeguranca;
 
     public ConfiguracaoSeguranca(FiltroSeguranca filtroSeguranca) {
         this.filtroSeguranca = filtroSeguranca;
@@ -25,9 +24,9 @@ public class ConfiguracaoSeguranca {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-
         return httpSecurity
-                .csrf(c -> c.disable())
+                .cors(c -> {}) // ✅ Ativa o CORS
+                .csrf(c -> c.disable()) // ❌ Desativa CSRF (API REST)
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(a -> a
                         .requestMatchers("/gerente/**").hasRole("GERENTE")
@@ -35,9 +34,7 @@ public class ConfiguracaoSeguranca {
                         .anyRequest().permitAll())
                 .addFilterBefore(filtroSeguranca, UsernamePasswordAuthenticationFilter.class)
                 .build();
-
     }
-
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
@@ -48,5 +45,4 @@ public class ConfiguracaoSeguranca {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
 }
