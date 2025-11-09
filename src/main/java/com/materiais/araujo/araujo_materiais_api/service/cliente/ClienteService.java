@@ -43,16 +43,16 @@ public class ClienteService {
     public ResponseEntity<ClienteResponseDTO> atualizarDados(Integer id, ClienteAtualizacaoDTO dto) {
         Usuario cliente = usuarioRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado com ID: "));
 
-        if (dto.nome() != null) {
+        if (!dto.nome().isEmpty()) {
             cliente.setNome(dto.nome());
         }
-        if (dto.email() != null) {
+        if (!dto.email().isEmpty()) {
             cliente.setEmail(dto.email());
         }
-        if (dto.contato() != null) {
+        if (!dto.contato().isEmpty()) {
             cliente.setTelefone(dto.contato());
         }
-        if (dto.senha() != null) {
+        if (!dto.senha().isEmpty()) {
             cliente.setSenha(passwordEncoder.encode(dto.senha()));
         }
 
