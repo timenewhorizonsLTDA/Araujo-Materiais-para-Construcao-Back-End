@@ -31,6 +31,7 @@ public class Produto {
     private TipoProduto tipo;
 
     @ManyToOne
+    @JoinColumn(name = "orcamento_id")
     private Orcamento orcamento;
 
     public Produto() {

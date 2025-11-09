@@ -17,7 +17,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class ConfiguracaoSeguranca {
 
-    private FiltroSeguranca filtroSeguranca;
+    private final FiltroSeguranca filtroSeguranca;
 
     public ConfiguracaoSeguranca(FiltroSeguranca filtroSeguranca) {
         this.filtroSeguranca = filtroSeguranca;
@@ -25,19 +25,18 @@ public class ConfiguracaoSeguranca {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-
         return httpSecurity
+                .cors(c -> {})
                 .csrf(c -> c.disable())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(a -> a
                         .requestMatchers("/gerente/**").hasRole("GERENTE")
                         .requestMatchers("/funcionario/**").hasRole("FUNCIONARIO")
+                        .requestMatchers("/cliente/**").hasRole("CLIENTE")
                         .anyRequest().permitAll())
                 .addFilterBefore(filtroSeguranca, UsernamePasswordAuthenticationFilter.class)
                 .build();
-
     }
-
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
@@ -48,5 +47,4 @@ public class ConfiguracaoSeguranca {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
 }
