@@ -5,12 +5,9 @@ import com.materiais.araujo.araujo_materiais_api.DTO.cliente.ClienteAtualizacaoD
 import com.materiais.araujo.araujo_materiais_api.DTO.cliente.ClienteResponseDTO;
 import com.materiais.araujo.araujo_materiais_api.DTO.divida.DividaResponseDTO;
 import com.materiais.araujo.araujo_materiais_api.DTO.produto.ProdutoDTO;
-import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.cliente.ClienteNaoEncontradoException;
-import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.gerente.FuncionarioNaoEncontradoException;
 import com.materiais.araujo.araujo_materiais_api.model.divida.StatusDivida;
 import com.materiais.araujo.araujo_materiais_api.model.orcamento.Orcamento;
 import com.materiais.araujo.araujo_materiais_api.model.solicitacaoproduto.StatusSolicitacao;
-import com.materiais.araujo.araujo_materiais_api.model.usuario.RoleUsuario;
 import com.materiais.araujo.araujo_materiais_api.model.usuario.Usuario;
 import com.materiais.araujo.araujo_materiais_api.repository.orcamento.OrcamentoRepository;
 import com.materiais.araujo.araujo_materiais_api.repository.usuario.UsuarioRepository;
@@ -22,7 +19,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -53,8 +49,8 @@ public class ClienteService {
         if (dto.email() != null) {
             cliente.setEmail(dto.email());
         }
-        if (dto.telefone() != null) {
-            cliente.setTelefone(dto.telefone());
+        if (dto.contato() != null) {
+            cliente.setTelefone(dto.contato());
         }
         if (dto.senha() != null) {
             cliente.setSenha(passwordEncoder.encode(dto.senha()));

@@ -22,7 +22,7 @@ public class ClienteController {
         this.clienteService = clienteService;
     }
 
-    @PutMapping("/ atualizar/{id}")
+    @PutMapping("/atualizar/{id}")
     public ResponseEntity<ClienteResponseDTO> editarFuncionario(@PathVariable(name = "id") Integer id, @RequestBody ClienteAtualizacaoDTO dto){
         return clienteService.atualizarDados(id, dto);
     }

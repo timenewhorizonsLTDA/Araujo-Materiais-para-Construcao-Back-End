@@ -1,7 +1,6 @@
 package com.materiais.araujo.araujo_materiais_api.service.gerente;
 
 import com.materiais.araujo.araujo_materiais_api.DTO.gerente.*;
-import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.gerente.DadosRepitidosEception;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.gerente.FuncionarioJaExistenteException;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.gerente.FuncionarioNaoEncontradoException;
 import com.materiais.araujo.araujo_materiais_api.infra.exceptions.personalizadas.gerente.SenhaInvalidaException;
@@ -70,18 +69,6 @@ public class GerenteService {
             throw new FuncionarioNaoEncontradoException();
         }
 
-        if (funcionario.getNome().equals(dto.nome())) {
-            throw new DadosRepitidosEception();
-        }
-
-        if (funcionario.getEmail().equals(dto.email())) {
-            throw new DadosRepitidosEception();
-        }
-
-        if (funcionario.getTelefone().equals(dto.contato())) {
-            throw new DadosRepitidosEception();
-        }
-
         if (!dto.nome().isEmpty()) {
             funcionario.setNome(dto.nome());
         }
@@ -116,7 +103,7 @@ public class GerenteService {
     }
 
 
-    public ResponseEntity<List<BuscarFuncionarioDTO>> buscarFuncionariosPorNome(BuscarFuncionarioNomeDTO dto){
+    public ResponseEntity<List<BuscarFuncionarioDTO>> buscarFuncionariosPorNome(BuscarFuncionarioNomeDTO dto) {
 
         List<Usuario> usuarios = usuarioRepository.findByRoleAndNomeContainingIgnoreCase(RoleUsuario.FUNCIONARIO, dto.nome());
 
@@ -126,11 +113,11 @@ public class GerenteService {
         return ResponseEntity.ok().body(usuariosDTO);
     }
 
-    public void deletarFuncionario(SenhaDTO senhaGerente, Integer idFuncionario){
+    public void deletarFuncionario(SenhaDTO senhaGerente, Integer idFuncionario) {
 
         Usuario gerente = utilUsuario.obterUsuarioDaVez();
 
-        if(!passwordEncoder.matches(senhaGerente.senha(), gerente.getSenha())){
+        if (!passwordEncoder.matches(senhaGerente.senha(), gerente.getSenha())) {
             throw new SenhaInvalidaException();
         }
 
